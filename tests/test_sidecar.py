@@ -1,0 +1,149 @@
+"""Model-free verification from a published ledger.
+
+This is what makes the model path defensible: a model may decide which positions were free
+at publish time, but the check afterwards must not depend on that model still existing, still
+being installed, or still behaving the same way. The sidecar pins the band and the anchor, so
+verification is a table lookup plus a hash.
+
+The failure modes worth testing are the quiet ones: an excerpt that reads as *fabricated*
+rather than merely weaker, and a reflowed copy whose slots stop matching because somebody
+stored a character offset instead of a word.
+"""
+
+from __future__ import annotations
+
+import json
+
+import pytest
+
+from conftest import KEY, SCRIPT, SENTENCE, ScriptedProvider, ScriptedScorer
+from inkmark.embed import embed
+from inkmark.keyring import WriterKey
+from inkmark.lm import embed_gated
+from inkmark.providers import default_table
+from inkmark.sidecar import build_sidecar, locate, verify
+
+# Distinct paragraphs, not one repeated: a mark is a *local* pattern, so repeating a single
+# paragraph and then "shuffling" it would prove nothing about ordering, and would let a
+# permutation of identical text pass a test that is supposed to fail it.
+PARAGRAPHS = [
+    ("She walked slowly toward the grey station, and the crowd parted before the engineers "
+    "marched off into the rain. Nobody said that the report was anything other than "
+    "confidential, and afterwards the judgement varied among them."),
+    ("It was a dull morning, and although the enquiry had begun earlier, nothing had been "
+    "written down. Perhaps the point was obvious; however, few said so, and she thought it "
+    "somewhat cold. Frequently they met at this point in the winter."),
+    ("In spite of the noise the work went onward, and acknowledgement came late. A lot of "
+    "reasons existed to be careful, and several ways to fail as well. He would rather leave "
+    "than stay, and the colour of the building did not change."),
+    ("Among the group, the enquiry continued, and he did not recognise the behaviour of the "
+    "board. She said that the record was complete, and that nobody had altered it, although "
+    "the judgement of the committee was another matter entirely."),
+    ("He walked toward the depot afterwards, grey and silent, and the crowd parted slowly. "
+    "Perhaps the reason was obvious, and however few said so, the report remained what it was."),
+    ("They talked about it for about an hour, and in the end they agreed on the matter. "
+    "Frequently the work went onward in spite of the noise, and judgement varied among the "
+    "engineers who had begun to worry about the winter."),
+]
+PROSE = " ".join(PARAGRAPHS * 3)
+
+
+def _marked():
+    return embed(PROSE, KEY, table=default_table("all"))
+
+
+def test_curated_sidecar_verifies_without_a_model():
+    marked = _marked()
+    ledger = marked.sidecar()
+    assert ledger["format"] == "inkmark-sidecar/2"
+    decision = verify(marked.text, KEY, ledger)
+    assert decision.slots == marked.slots
+    assert decision.hits == decision.slots
+    assert decision.p_value < 1e-6
+
+
+def test_sidecar_verification_survives_reflow_and_case():
+    marked = _marked()
+    ledger = marked.sidecar()
+    reflowed = "\n\n".join(
+        " ".join(marked.text.split()[i : i + 9]) for i in range(0, len(marked.text.split()), 9)
+    )
+    decision = verify(reflowed, KEY, ledger)
+    assert decision.slots >= 0.9 * marked.slots, "anchors are words, not offsets"
+    assert decision.hits == decision.slots
+    assert verify(marked.text.lower(), KEY, ledger).hits == decision.hits
+
+
+def test_excerpt_reads_weaker_and_never_guilty():
+    marked = _marked()
+    words = marked.text.split()
+    excerpt = " ".join(words[len(words) // 4 : 3 * len(words) // 4])
+    decision = verify(excerpt, KEY, marked.sidecar())
+    assert decision.slots < marked.slots
+    assert decision.hits == decision.slots, "a lost slot must be absent, not a disagreement"
+    assert any("could still be located" in c for c in decision.caveats)
+
+
+def test_foreign_key_cannot_pass_sidecar_verification():
+    marked = _marked()
+    stranger = WriterKey(secret=b"9" * 32, key_id="stranger", created="", year=2026)
+    quiet = verify(marked.text, stranger, marked.sidecar())
+    assert quiet.slots == marked.slots, "slot locations do not depend on the key"
+    assert abs(quiet.hits - quiet.expected) < quiet.slots / 2 + 1
+    assert quiet.z < 3.5
+
+
+def test_reordering_whole_paragraphs_loses_the_local_pattern():
+    """Each record's anchor is the few words before it, so a permutation breaks the pairs that
+    crossed a paragraph boundary and the mark degrades instead of falsely accusing."""
+    marked = _marked()
+    shuffled = " ".join(list(reversed(PARAGRAPHS)) * 3)
+    decision = verify(shuffled, KEY, marked.sidecar())
+    assert decision.slots < marked.slots, "a permutation must lose anchors, not preserve them"
+    assert decision.z < 4.754, "a shuffled text must not be reported as this writer's"
+
+
+def test_a_longer_marked_document_clears_the_strict_threshold():
+    marked = _marked()
+    decision = verify(marked.text, KEY, marked.sidecar())
+    assert decision.slots >= 25
+    assert decision.hits == decision.slots
+    assert decision.p_value < 1e-6
+
+
+def test_locate_consumes_each_record_once_in_document_order():
+    marked = _marked()
+    entries = locate(marked.text, marked.sidecar())
+    offsets = [e.start for e in entries]
+    assert offsets == sorted(offsets)
+    assert len(set(offsets)) == len(offsets)
+
+
+def test_gated_sidecar_names_its_model_and_is_checkable_without_it():
+    marked = embed_gated(SENTENCE, KEY, ScriptedProvider(SCRIPT), ScriptedScorer())
+    decision = verify(marked.text, KEY, marked.sidecar)
+    assert decision.slots == marked.slots
+    assert decision.hits == decision.slots
+    assert any("scripted/1" in c for c in decision.caveats)
+
+
+def test_sidecar_round_trips_through_json():
+    marked = _marked()
+    ledger = build_sidecar(
+        marked.entries, key_id=KEY.key_id, reachable=default_table("all").reachable
+    )
+    assert verify(marked.text, KEY, json.loads(json.dumps(ledger))).hits == marked.slots
+
+
+def test_rewriting_a_marked_word_out_of_its_class_drops_only_that_slot():
+    marked = _marked()
+    assert marked.slots >= 3
+    for original, replacement in (("toward", "in the direction of"), ("grey", "dull coloured")):
+        edited = marked.text.replace(original, replacement, 1)
+        if edited == marked.text:
+            continue
+        decision = verify(edited, KEY, marked.sidecar())
+        assert decision.slots >= marked.slots - 2, f"{original} loss cascaded"
+        assert decision.hits == decision.slots
+        return
+    pytest.skip("none of the expected surfaces occurred")

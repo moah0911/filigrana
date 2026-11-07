@@ -1,0 +1,286 @@
+{
+ "format": "inkmark-sidecar/1",
+ "slots": [
+  {
+   "class": "b.lot_of",
+   "tier": "b",
+   "members": [
+    "a lot of",
+    "lots of"
+   ],
+   "final": 1,
+   "wanted": 1,
+   "bit": null,
+   "vetted": false
+  },
+  {
+   "class": "b.a_number_of",
+   "tier": "b",
+   "members": [
+    "a number of",
+    "several"
+   ],
+   "final": 1,
+   "wanted": 1,
+   "bit": null,
+   "vetted": false
+  },
+  {
+   "class": "b.approx_word",
+   "tier": "b",
+   "members": [
+    "about",
+    "approximately",
+    "around"
+   ],
+   "final": 0,
+   "wanted": 1,
+   "bit": null,
+   "vetted": true
+  },
+  {
+   "class": "a.afterward",
+   "tier": "a",
+   "members": [
+    "afterward",
+    "afterwards"
+   ],
+   "final": 0,
+   "wanted": 0,
+   "bit": null,
+   "vetted": false
+  },
+  {
+   "class": "a.toward",
+   "tier": "a",
+   "members": [
+    "toward",
+    "towards"
+   ],
+   "final": 0,
+   "wanted": 0,
+   "bit": null,
+   "vetted": false
+  },
+  {
+   "class": "c.grey",
+   "tier": "c",
+   "members": [
+    "gray",
+    "grey"
+   ],
+   "final": 0,
+   "wanted": 0,
+   "bit": null,
+   "vetted": false
+  },
+  {
+   "class": "b.although",
+   "tier": "b",
+   "members": [
+    "although",
+    "though"
+   ],
+   "final": 0,
+   "wanted": 0,
+   "bit": null,
+   "vetted": false
+  },
+  {
+   "class": "b.maybe",
+   "tier": "b",
+   "members": [
+    "maybe",
+    "perhaps"
+   ],
+   "final": 0,
+   "wanted": 0,
+   "bit": null,
+   "vetted": false
+  },
+  {
+   "class": "b.however",
+   "tier": "b",
+   "members": [
+    "however",
+    "nevertheless"
+   ],
+   "final": 0,
+   "wanted": 1,
+   "bit": null,
+   "vetted": true
+  },
+  {
+   "class": "b.rather",
+   "tier": "b",
+   "members": [
+    "rather",
+    "somewhat"
+   ],
+   "final": 1,
+   "wanted": 1,
+   "bit": null,
+   "vetted": false
+  },
+  {
+   "class": "a.among",
+   "tier": "a",
+   "members": [
+    "among",
+    "amongst"
+   ],
+   "final": 0,
+   "wanted": 0,
+   "bit": null,
+   "vetted": false
+  },
+  {
+   "class": "a.judgment",
+   "tier": "a",
+   "members": [
+    "judgement",
+    "judgment"
+   ],
+   "final": 1,
+   "wanted": 1,
+   "bit": null,
+   "vetted": false
+  },
+  {
+   "class": "a.acknowledgment",
+   "tier": "a",
+   "members": [
+    "acknowledgement",
+    "acknowledgment"
+   ],
+   "final": 0,
+   "wanted": 0,
+   "bit": null,
+   "vetted": false
+  },
+  {
+   "class": "a.onward",
+   "tier": "a",
+   "members": [
+    "onward",
+    "onwards"
+   ],
+   "final": 1,
+   "wanted": 1,
+   "bit": null,
+   "vetted": false
+  },
+  {
+   "class": "b.often",
+   "tier": "b",
+   "members": [
+    "frequently",
+    "often"
+   ],
+   "final": 0,
+   "wanted": 0,
+   "bit": null,
+   "vetted": false
+  },
+  {
+   "class": "b.at_this_point",
+   "tier": "b",
+   "members": [
+    "at this point",
+    "at this stage"
+   ],
+   "final": 0,
+   "wanted": 0,
+   "bit": null,
+   "vetted": false
+  },
+  {
+   "class": "b.in_the_end",
+   "tier": "b",
+   "members": [
+    "eventually",
+    "in the end"
+   ],
+   "final": 0,
+   "wanted": 0,
+   "bit": null,
+   "vetted": false
+  },
+  {
+   "class": "b.despite",
+   "tier": "b",
+   "members": [
+    "despite",
+    "in spite of"
+   ],
+   "final": 1,
+   "wanted": 1,
+   "bit": null,
+   "vetted": false
+  },
+  {
+   "class": "c.did_not",
+   "tier": "c",
+   "members": [
+    "did not",
+    "didn't"
+   ],
+   "final": 1,
+   "wanted": 1,
+   "bit": null,
+   "vetted": false
+  },
+  {
+   "class": "c.recognise",
+   "tier": "c",
+   "members": [
+    "recognise",
+    "recognize"
+   ],
+   "final": 0,
+   "wanted": 0,
+   "bit": null,
+   "vetted": false
+  },
+  {
+   "class": "c.colour",
+   "tier": "c",
+   "members": [
+    "color",
+    "colour"
+   ],
+   "final": 0,
+   "wanted": 0,
+   "bit": null,
+   "vetted": false
+  },
+  {
+   "class": "b.although",
+   "tier": "b",
+   "members": [
+    "although",
+    "though"
+   ],
+   "final": 1,
+   "wanted": 1,
+   "bit": null,
+   "vetted": false
+  },
+  {
+   "class": "c.was_not",
+   "tier": "c",
+   "members": [
+    "was not",
+    "wasn't"
+   ],
+   "final": 0,
+   "wanted": 0,
+   "bit": null,
+   "vetted": false
+  }
+ ],
+ "key_id": "ink-2026-00-DEMO-replace-me",
+ "words": 144,
+ "fingerprint": "5e1bb4fb670791d3",
+ "warning": "the demo key is not shipped; regenerate with your own before publishing anything"
+}

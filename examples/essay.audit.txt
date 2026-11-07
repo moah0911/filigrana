@@ -1,0 +1,10 @@
+140 words, 23 choices (164.3 per 1000 words) {'b': 12, 'a': 6, 'c': 5}
+best possible z at full strength: 4.88  (p = 5.38e-07)
+words needed for p<1e-6 at this density: 138
+  verbatim copy              z ->   4.88   p -> 5.38e-07
+  25% of slots edited away   z ->   4.22   p -> 1.2e-05
+  half the text quoted       z ->   3.45   p -> 0.000282
+  a quarter of slots left    z ->   2.44   p -> 0.00737
+
+! This is a prediction of the best case, assuming you apply every demand. Every
+  vetoed slot and every locale-normalising edit at the publisher moves you down.

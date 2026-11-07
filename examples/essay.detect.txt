@@ -1,0 +1,10 @@
+key        ink-2026-00-640b3d07  fingerprint 5e1bb4fb670791d3
+length     140 words, 23 key-correlated choices  (a:6, b:12, c:5)
+agreement  21/23 slots on the key's side (chance would give 11.3)
+statistics z = 4.04, p = 2.66e-05
+strength   15.2 bits of evidence against chance
+
+  ! Computed from the text alone: no sidecar, so the verifier re-derived which choices were free. A sidecar from publication time is strictly stronger.
+  ! Detects an intact or lightly edited copy. Measured prior art puts full paraphrase and translation at zero survival -- the words carry the mark, so rewriting the words removes it.
+
+  This is a statistical test of whether one writer's key explains the word choices in this text. It is not proof of authorship, it cannot say who else might have written it, and it cannot show that the key holder owns the underlying text. Genius planted a watermark in 301 songs, found it in Google's index, and still lost the case because it licensed the lyrics. Treat this as one piece of evidence next to timestamps and drafts.

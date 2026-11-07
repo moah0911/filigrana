@@ -1,0 +1,77 @@
+{
+ "files": [
+  "gutenberg-1342.txt",
+  "gutenberg-18502.txt",
+  "gutenberg-1976.txt",
+  "gutenberg-2701.txt",
+  "gutenberg-3464.txt",
+  "gutenberg-84.txt"
+ ],
+ "n_keys": 10,
+ "runs": [
+  {
+   "tier": "ab",
+   "chunks": 2805,
+   "words": 648361,
+   "slots": 5362,
+   "rho_per_1000w": 8.27,
+   "slots_per_chunk_mean": 1.91,
+   "slots_per_chunk_sd": 1.53,
+   "null_z_mean": 0.0006,
+   "null_z_sd": 0.9073,
+   "null_z_max": 2.673,
+   "fpr_at_1pct": 0.0005,
+   "fpr_at_1e6": 0.0,
+   "words_for_1e6": 2733,
+   "chunk_words": 215
+  },
+  {
+   "tier": "all",
+   "chunks": 2805,
+   "words": 648361,
+   "slots": 14099,
+   "rho_per_1000w": 21.75,
+   "slots_per_chunk_mean": 5.03,
+   "slots_per_chunk_sd": 3.02,
+   "null_z_mean": 0.0014,
+   "null_z_sd": 0.9857,
+   "null_z_max": 3.357,
+   "fpr_at_1pct": 0.00481,
+   "fpr_at_1e6": 0.0,
+   "words_for_1e6": 1039,
+   "chunk_words": 215
+  },
+  {
+   "tier": "ab",
+   "chunks": 594,
+   "words": 648423,
+   "slots": 5362,
+   "rho_per_1000w": 8.27,
+   "slots_per_chunk_mean": 9.03,
+   "slots_per_chunk_sd": 3.62,
+   "null_z_mean": 0.0063,
+   "null_z_sd": 0.9807,
+   "null_z_max": 3.162,
+   "fpr_at_1pct": 0.00842,
+   "fpr_at_1e6": 0.0,
+   "words_for_1e6": 2733,
+   "chunk_words": 1075
+  },
+  {
+   "tier": "all",
+   "chunks": 594,
+   "words": 648423,
+   "slots": 14098,
+   "rho_per_1000w": 21.74,
+   "slots_per_chunk_mean": 23.73,
+   "slots_per_chunk_sd": 9.43,
+   "null_z_mean": 0.0028,
+   "null_z_sd": 0.9894,
+   "null_z_max": 3.157,
+   "fpr_at_1pct": 0.00943,
+   "fpr_at_1e6": 0.0,
+   "words_for_1e6": 1039,
+   "chunk_words": 1075
+  }
+ ]
+}

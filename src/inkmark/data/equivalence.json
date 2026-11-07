@@ -1,0 +1,1461 @@
+{
+ "version": "2026-11-06",
+ "comment": "Hand-audited equivalence classes. A class is admissible only if every member is substitutable for every other member in every context the class appears in -- symmetric, not merely 'usually synonymous'. Direction matters: help/aid is excluded because 'foreign aid' cannot become 'foreign help'. Fields: after = allowed preceding tokens, not_after = forbidden preceding tokens, before = allowed following tokens ('#' means a numeral), avoid_clause_final = refuse when the member ends a clause.",
+ "classes": [
+  {
+   "id": "a.toward",
+   "tier": "a",
+   "members": [
+    "toward",
+    "towards"
+   ],
+   "note": "Orthographic. Neither form marks a dialect."
+  },
+  {
+   "id": "a.onward",
+   "tier": "a",
+   "members": [
+    "onward",
+    "onwards"
+   ],
+   "note": ""
+  },
+  {
+   "id": "a.downward",
+   "tier": "a",
+   "members": [
+    "downward",
+    "downwards"
+   ],
+   "note": "Adverb only, but the adjective sense is identical either way."
+  },
+  {
+   "id": "a.upward",
+   "tier": "a",
+   "members": [
+    "upward",
+    "upwards"
+   ],
+   "note": ""
+  },
+  {
+   "id": "a.backward",
+   "tier": "a",
+   "members": [
+    "backward",
+    "backwards"
+   ],
+   "note": ""
+  },
+  {
+   "id": "a.forward",
+   "tier": "a",
+   "members": [
+    "forward",
+    "forwards"
+   ],
+   "note": "Excluded where a verb follows immediately, i.e. 'forward the mail'."
+  },
+  {
+   "id": "a.inward",
+   "tier": "a",
+   "members": [
+    "inward",
+    "inwards"
+   ],
+   "note": ""
+  },
+  {
+   "id": "a.outward",
+   "tier": "a",
+   "members": [
+    "outward",
+    "outwards"
+   ],
+   "note": ""
+  },
+  {
+   "id": "a.afterward",
+   "tier": "a",
+   "members": [
+    "afterward",
+    "afterwards"
+   ],
+   "note": ""
+  },
+  {
+   "id": "a.among",
+   "tier": "a",
+   "members": [
+    "among",
+    "amongst"
+   ],
+   "note": ""
+  },
+  {
+   "id": "a.judgment",
+   "tier": "a",
+   "members": [
+    "judgement",
+    "judgment"
+   ],
+   "note": ""
+  },
+  {
+   "id": "a.acknowledgment",
+   "tier": "a",
+   "members": [
+    "acknowledgement",
+    "acknowledgment"
+   ],
+   "note": ""
+  },
+  {
+   "id": "a.ax",
+   "tier": "a",
+   "members": [
+    "ax",
+    "axe"
+   ],
+   "note": "Rare in prose; kept for completeness."
+  },
+  {
+   "id": "b.maybe",
+   "tier": "b",
+   "members": [
+    "maybe",
+    "perhaps"
+   ],
+   "note": "Both sentence-initial adverbs; 'maybe' slightly informal."
+  },
+  {
+   "id": "b.however",
+   "tier": "b",
+   "members": [
+    "however",
+    "nevertheless"
+   ],
+   "note": "Conjunctive adverb at clause start.",
+   "not_before": [
+    "hard",
+    "much",
+    "many",
+    "often",
+    "fast",
+    "long",
+    "great",
+    "difficult",
+    "easily",
+    "carefully",
+    "well",
+    "good",
+    "bad",
+    "far",
+    "little"
+   ]
+  },
+  {
+   "id": "b.although",
+   "tier": "b",
+   "members": [
+    "although",
+    "though"
+   ],
+   "note": "'though' is clause-final as an adverb ('I liked it though'), which 'although' cannot be.",
+   "avoid_clause_final": true,
+   "not_after": [
+    "even",
+    "as",
+    "though"
+   ]
+  },
+  {
+   "id": "b.often",
+   "tier": "b",
+   "members": [
+    "frequently",
+    "often"
+   ],
+   "note": ""
+  },
+  {
+   "id": "b.begin",
+   "tier": "b",
+   "members": [
+    "begin",
+    "start"
+   ],
+   "note": "Same inflectional shape only, hence the separate classes.",
+   "not_after": [
+    "the",
+    "a",
+    "an",
+    "good",
+    "quick",
+    "slow",
+    "clean",
+    "strong",
+    "fresh"
+   ]
+  },
+  {
+   "id": "b.begins",
+   "tier": "b",
+   "members": [
+    "begins",
+    "starts"
+   ],
+   "note": "",
+   "not_after": [
+    "the",
+    "a",
+    "an",
+    "good",
+    "quick",
+    "slow"
+   ]
+  },
+  {
+   "id": "b.beginning",
+   "tier": "b",
+   "members": [
+    "beginning",
+    "starting"
+   ],
+   "note": "Gerund/participle.",
+   "not_after": [
+    "the",
+    "a",
+    "an",
+    "his",
+    "her",
+    "its",
+    "their",
+    "our",
+    "this",
+    "that",
+    "at",
+    "from",
+    "of"
+   ]
+  },
+  {
+   "id": "b.began",
+   "tier": "b",
+   "members": [
+    "began",
+    "started"
+   ],
+   "note": "",
+   "not_after": [
+    "the",
+    "a",
+    "an",
+    "good",
+    "quick",
+    "slow"
+   ]
+  },
+  {
+   "id": "b.therefore",
+   "tier": "b",
+   "members": [
+    "hence",
+    "therefore"
+   ],
+   "note": ""
+  },
+  {
+   "id": "b.moreover",
+   "tier": "b",
+   "members": [
+    "furthermore",
+    "moreover"
+   ],
+   "note": ""
+  },
+  {
+   "id": "b.despite",
+   "tier": "b",
+   "members": [
+    "despite",
+    "in spite of"
+   ],
+   "note": "Multi-word member; both take a bare noun phrase."
+  },
+  {
+   "id": "b.rather",
+   "tier": "b",
+   "members": [
+    "rather",
+    "somewhat"
+   ],
+   "note": "'would rather'/'had rather' is not substitutable.",
+   "not_after": [
+    "would",
+    "had",
+    "none",
+    "or"
+   ],
+   "not_before": [
+    "than"
+   ]
+  },
+  {
+   "id": "b.approx_num",
+   "tier": "b",
+   "members": [
+    "about",
+    "approximately",
+    "around"
+   ],
+   "note": "Approximator reading only, which is why a numeral must follow.",
+   "before": [
+    "#"
+   ]
+  },
+  {
+   "id": "b.approx_word",
+   "tier": "b",
+   "members": [
+    "about",
+    "approximately",
+    "around"
+   ],
+   "note": "Approximator before a spelled-out quantity.",
+   "before": [
+    "zero",
+    "one",
+    "two",
+    "three",
+    "four",
+    "five",
+    "six",
+    "seven",
+    "eight",
+    "nine",
+    "ten",
+    "eleven",
+    "twelve",
+    "dozen",
+    "hundred",
+    "thousand",
+    "million",
+    "billion",
+    "twenty",
+    "thirty",
+    "forty",
+    "fifty",
+    "sixty",
+    "seventy",
+    "eighty",
+    "ninety",
+    "a",
+    "an",
+    "half",
+    "few",
+    "several",
+    "many",
+    "much"
+   ]
+  },
+  {
+   "id": "b.kind_of",
+   "tier": "b",
+   "members": [
+    "kind of",
+    "sort of"
+   ],
+   "note": "Register-marked; both are hedging and neither adds content.",
+   "avoid_clause_final": true
+  },
+  {
+   "id": "b.enormous",
+   "tier": "b",
+   "members": [
+    "enormous",
+    "huge"
+   ],
+   "note": "Attributive or predicative use with a scalar noun.",
+   "not_after": [
+    "the",
+    "a",
+    "an"
+   ]
+  },
+  {
+   "id": "b.immediate",
+   "tier": "b",
+   "members": [
+    "direct",
+    "immediate"
+   ],
+   "note": "'immediate family'/'direct' collision avoided by requiring the next token to be temporal or causal.",
+   "before": [
+    "future",
+    "past",
+    "response",
+    "result",
+    "cause",
+    "effect",
+    "impact",
+    "reaction",
+    "solution",
+    "change"
+   ]
+  },
+  {
+   "id": "b.caused",
+   "tier": "b",
+   "members": [
+    "brought about",
+    "caused"
+   ],
+   "note": "Verb phrase, transitive, past tense."
+  },
+  {
+   "id": "b.lot_of",
+   "tier": "b",
+   "members": [
+    "a lot of",
+    "lots of"
+   ],
+   "note": "Same register already, quantity identical."
+  },
+  {
+   "id": "b.a_number_of",
+   "tier": "b",
+   "members": [
+    "a number of",
+    "several"
+   ],
+   "note": "Both are vague plural quantifiers.",
+   "avoid_clause_final": true
+  },
+  {
+   "id": "b.due_to",
+   "tier": "b",
+   "members": [
+    "due to",
+    "owing to"
+   ],
+   "note": "Adverbial causal; 'because of' excluded as a third direction."
+  },
+  {
+   "id": "b.for_example",
+   "tier": "b",
+   "members": [
+    "for example",
+    "for instance"
+   ],
+   "note": ""
+  },
+  {
+   "id": "b.on_the_other_hand",
+   "tier": "b",
+   "members": [
+    "alternatively",
+    "on the other hand"
+   ],
+   "note": "Discourse connective, no truth change."
+  },
+  {
+   "id": "b.i_think",
+   "tier": "b",
+   "members": [
+    "i believe",
+    "i think"
+   ],
+   "note": "Hedge, no content change.",
+   "avoid_clause_final": true
+  },
+  {
+   "id": "b.at_this_point",
+   "tier": "b",
+   "members": [
+    "at this point",
+    "at this stage"
+   ],
+   "note": ""
+  },
+  {
+   "id": "b.in_the_end",
+   "tier": "b",
+   "members": [
+    "eventually",
+    "in the end"
+   ],
+   "note": ""
+  },
+  {
+   "id": "b.nowadays",
+   "tier": "b",
+   "members": [
+    "nowadays",
+    "these days"
+   ],
+   "note": ""
+  },
+  {
+   "id": "c.colour",
+   "tier": "c",
+   "members": [
+    "color",
+    "colour"
+   ],
+   "note": "Locale-consistent: mixing forms inside one article is visible to an editor.",
+   "locale": true
+  },
+  {
+   "id": "c.favour",
+   "tier": "c",
+   "members": [
+    "favor",
+    "favour"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.honour",
+   "tier": "c",
+   "members": [
+    "honor",
+    "honour"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.behaviour",
+   "tier": "c",
+   "members": [
+    "behavior",
+    "behaviour"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.labour",
+   "tier": "c",
+   "members": [
+    "labor",
+    "labour"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.neighbour",
+   "tier": "c",
+   "members": [
+    "neighbor",
+    "neighbour"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.rumour",
+   "tier": "c",
+   "members": [
+    "rumor",
+    "rumour"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.flavour",
+   "tier": "c",
+   "members": [
+    "flavor",
+    "flavour"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.endeavour",
+   "tier": "c",
+   "members": [
+    "endeavor",
+    "endeavour"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.ardour",
+   "tier": "c",
+   "members": [
+    "ardor",
+    "ardour"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.humour",
+   "tier": "c",
+   "members": [
+    "humor",
+    "humour"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.splendour",
+   "tier": "c",
+   "members": [
+    "splendor",
+    "splendour"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.vapour",
+   "tier": "c",
+   "members": [
+    "vapor",
+    "vapour"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.centre",
+   "tier": "c",
+   "members": [
+    "center",
+    "centre"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.metre",
+   "tier": "c",
+   "members": [
+    "meter",
+    "metre"
+   ],
+   "note": "Ambiguous with the measuring device in AmE.",
+   "locale": true
+  },
+  {
+   "id": "c.litre",
+   "tier": "c",
+   "members": [
+    "liter",
+    "litre"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.fibre",
+   "tier": "c",
+   "members": [
+    "fiber",
+    "fibre"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.theatre",
+   "tier": "c",
+   "members": [
+    "theater",
+    "theatre"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.favourite",
+   "tier": "c",
+   "members": [
+    "favorite",
+    "favourite"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.sombre",
+   "tier": "c",
+   "members": [
+    "somber",
+    "sombre"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.grey",
+   "tier": "c",
+   "members": [
+    "gray",
+    "grey"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.check",
+   "tier": "c",
+   "members": [
+    "check",
+    "cheque"
+   ],
+   "note": "Only the payment sense.",
+   "locale": true
+  },
+  {
+   "id": "c.programme",
+   "tier": "c",
+   "members": [
+    "program",
+    "programme"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.tyre",
+   "tier": "c",
+   "members": [
+    "tire",
+    "tyre"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.kerb",
+   "tier": "c",
+   "members": [
+    "curb",
+    "kerb"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.cosy",
+   "tier": "c",
+   "members": [
+    "cosy",
+    "cozy"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.sceptical",
+   "tier": "c",
+   "members": [
+    "sceptical",
+    "skeptical"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.moustache",
+   "tier": "c",
+   "members": [
+    "moustache",
+    "mustache"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.plough",
+   "tier": "c",
+   "members": [
+    "plough",
+    "plow"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.draught",
+   "tier": "c",
+   "members": [
+    "draft",
+    "draught"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.analyse",
+   "tier": "c",
+   "members": [
+    "analyse",
+    "analyze"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.analyses",
+   "tier": "c",
+   "members": [
+    "analyses",
+    "analyzes"
+   ],
+   "note": "Third-person singular only; the plural noun 'analyses' is excluded by the guard.",
+   "locale": true,
+   "after": [
+    "he",
+    "she",
+    "it",
+    "one",
+    "who",
+    "that",
+    "which",
+    "this",
+    "that"
+   ]
+  },
+  {
+   "id": "c.organise",
+   "tier": "c",
+   "members": [
+    "organise",
+    "organize"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.organises",
+   "tier": "c",
+   "members": [
+    "organises",
+    "organizes"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.organising",
+   "tier": "c",
+   "members": [
+    "organising",
+    "organizing"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.organised",
+   "tier": "c",
+   "members": [
+    "organised",
+    "organized"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.recognise",
+   "tier": "c",
+   "members": [
+    "recognise",
+    "recognize"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.recognises",
+   "tier": "c",
+   "members": [
+    "recognises",
+    "recognizes"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.recognising",
+   "tier": "c",
+   "members": [
+    "recognising",
+    "recognizing"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.recognised",
+   "tier": "c",
+   "members": [
+    "recognised",
+    "recognized"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.realise",
+   "tier": "c",
+   "members": [
+    "realise",
+    "realize"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.realises",
+   "tier": "c",
+   "members": [
+    "realises",
+    "realizes"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.realising",
+   "tier": "c",
+   "members": [
+    "realising",
+    "realizing"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.realised",
+   "tier": "c",
+   "members": [
+    "realised",
+    "realized"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.emphasise",
+   "tier": "c",
+   "members": [
+    "emphasise",
+    "emphasize"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.emphasises",
+   "tier": "c",
+   "members": [
+    "emphasises",
+    "emphasizes"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.emphasised",
+   "tier": "c",
+   "members": [
+    "emphasised",
+    "emphasized"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.criticise",
+   "tier": "c",
+   "members": [
+    "criticise",
+    "criticize"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.criticised",
+   "tier": "c",
+   "members": [
+    "criticised",
+    "criticized"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.summarise",
+   "tier": "c",
+   "members": [
+    "summarise",
+    "summarize"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.summarised",
+   "tier": "c",
+   "members": [
+    "summarised",
+    "summarized"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.generalise",
+   "tier": "c",
+   "members": [
+    "generalise",
+    "generalize"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.minimise",
+   "tier": "c",
+   "members": [
+    "minimise",
+    "minimize"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.minimised",
+   "tier": "c",
+   "members": [
+    "minimised",
+    "minimized"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.maximise",
+   "tier": "c",
+   "members": [
+    "maximise",
+    "maximize"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.apologise",
+   "tier": "c",
+   "members": [
+    "apologise",
+    "apologize"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.apologised",
+   "tier": "c",
+   "members": [
+    "apologised",
+    "apologized"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.authorise",
+   "tier": "c",
+   "members": [
+    "authorise",
+    "authorize"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.authorised",
+   "tier": "c",
+   "members": [
+    "authorised",
+    "authorized"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.prioritise",
+   "tier": "c",
+   "members": [
+    "prioritise",
+    "prioritize"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.learnt",
+   "tier": "c",
+   "members": [
+    "learned",
+    "learnt"
+   ],
+   "note": "Only the verb; 'a learned habit' is adjectival.",
+   "locale": true
+  },
+  {
+   "id": "c.burnt",
+   "tier": "c",
+   "members": [
+    "burned",
+    "burnt"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.spelt",
+   "tier": "c",
+   "members": [
+    "spelled",
+    "spelt"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.dreamt",
+   "tier": "c",
+   "members": [
+    "dreamed",
+    "dreamt"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.leapt",
+   "tier": "c",
+   "members": [
+    "leaped",
+    "leapt"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.travelling",
+   "tier": "c",
+   "members": [
+    "traveling",
+    "travelling"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.travelled",
+   "tier": "c",
+   "members": [
+    "traveled",
+    "travelled"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.modelling",
+   "tier": "c",
+   "members": [
+    "modeling",
+    "modelling"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.labelled",
+   "tier": "c",
+   "members": [
+    "labeled",
+    "labelled"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.cancelled",
+   "tier": "c",
+   "members": [
+    "canceled",
+    "cancelled"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.fuelled",
+   "tier": "c",
+   "members": [
+    "fueled",
+    "fuelled"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.marvellous",
+   "tier": "c",
+   "members": [
+    "marvellous",
+    "marvelous"
+   ],
+   "note": "",
+   "locale": true
+  },
+  {
+   "id": "c.it_is",
+   "tier": "c",
+   "members": [
+    "it is",
+    "it's"
+   ],
+   "note": "Register: consistent contraction use is a style decision, so mixing them inside one article is a visible inconsistency.",
+   "register": true
+  },
+  {
+   "id": "c.do_not",
+   "tier": "c",
+   "members": [
+    "do not",
+    "don't"
+   ],
+   "note": "",
+   "register": true
+  },
+  {
+   "id": "c.does_not",
+   "tier": "c",
+   "members": [
+    "does not",
+    "doesn't"
+   ],
+   "note": "",
+   "register": true
+  },
+  {
+   "id": "c.did_not",
+   "tier": "c",
+   "members": [
+    "did not",
+    "didn't"
+   ],
+   "note": "",
+   "register": true
+  },
+  {
+   "id": "c.cannot",
+   "tier": "c",
+   "members": [
+    "can't",
+    "cannot"
+   ],
+   "note": "'can not' as two words also exists but is excluded to keep the class two-way.",
+   "register": true
+  },
+  {
+   "id": "c.could_not",
+   "tier": "c",
+   "members": [
+    "could not",
+    "couldn't"
+   ],
+   "note": "",
+   "register": true
+  },
+  {
+   "id": "c.would_not",
+   "tier": "c",
+   "members": [
+    "would not",
+    "wouldn't"
+   ],
+   "note": "",
+   "register": true
+  },
+  {
+   "id": "c.should_not",
+   "tier": "c",
+   "members": [
+    "should not",
+    "shouldn't"
+   ],
+   "note": "",
+   "register": true
+  },
+  {
+   "id": "c.is_not",
+   "tier": "c",
+   "members": [
+    "is not",
+    "isn't"
+   ],
+   "note": "",
+   "register": true
+  },
+  {
+   "id": "c.are_not",
+   "tier": "c",
+   "members": [
+    "are not",
+    "aren't"
+   ],
+   "note": "",
+   "register": true
+  },
+  {
+   "id": "c.was_not",
+   "tier": "c",
+   "members": [
+    "was not",
+    "wasn't"
+   ],
+   "note": "",
+   "register": true
+  },
+  {
+   "id": "c.were_not",
+   "tier": "c",
+   "members": [
+    "were not",
+    "weren't"
+   ],
+   "note": "",
+   "register": true
+  },
+  {
+   "id": "c.have_not",
+   "tier": "c",
+   "members": [
+    "have not",
+    "haven't"
+   ],
+   "note": "",
+   "register": true
+  },
+  {
+   "id": "c.has_not",
+   "tier": "c",
+   "members": [
+    "has not",
+    "hasn't"
+   ],
+   "note": "",
+   "register": true
+  },
+  {
+   "id": "c.had_not",
+   "tier": "c",
+   "members": [
+    "had not",
+    "hadn't"
+   ],
+   "note": "",
+   "register": true
+  },
+  {
+   "id": "c.will_not",
+   "tier": "c",
+   "members": [
+    "will not",
+    "won't"
+   ],
+   "note": "",
+   "register": true
+  },
+  {
+   "id": "c.there_is",
+   "tier": "c",
+   "members": [
+    "there is",
+    "there's"
+   ],
+   "note": "",
+   "register": true
+  },
+  {
+   "id": "c.that_is",
+   "tier": "c",
+   "members": [
+    "that is",
+    "that's"
+   ],
+   "note": "",
+   "register": true
+  },
+  {
+   "id": "c.i_am",
+   "tier": "c",
+   "members": [
+    "i am",
+    "i'm"
+   ],
+   "note": "",
+   "register": true
+  },
+  {
+   "id": "c.i_have",
+   "tier": "c",
+   "members": [
+    "i have",
+    "i've"
+   ],
+   "note": "",
+   "register": true
+  },
+  {
+   "id": "c.we_have",
+   "tier": "c",
+   "members": [
+    "we have",
+    "we've"
+   ],
+   "note": "",
+   "register": true
+  },
+  {
+   "id": "c.she_is",
+   "tier": "c",
+   "members": [
+    "she is",
+    "she's"
+   ],
+   "note": "Ambiguous with 'she has'; both readings keep the substitution safe.",
+   "register": true
+  },
+  {
+   "id": "c.he_is",
+   "tier": "c",
+   "members": [
+    "he is",
+    "he's"
+   ],
+   "note": "",
+   "register": true
+  }
+ ]
+}

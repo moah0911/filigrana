@@ -1,0 +1,166 @@
+{
+ "articles": 120,
+ "words": 2500,
+ "runs": [
+  {
+   "tier": "ab",
+   "attack": "verbatim",
+   "mean_z": 4.51,
+   "median_z": 4.47,
+   "detected_p1e6": 0.3667,
+   "slots_retained": 1.0
+  },
+  {
+   "tier": "ab",
+   "attack": "reflow_72col",
+   "mean_z": 4.51,
+   "median_z": 4.47,
+   "detected_p1e6": 0.3667,
+   "slots_retained": 1.0
+  },
+  {
+   "tier": "ab",
+   "attack": "lowercased",
+   "mean_z": 4.51,
+   "median_z": 4.47,
+   "detected_p1e6": 0.3667,
+   "slots_retained": 1.0
+  },
+  {
+   "tier": "ab",
+   "attack": "middle_50pct_quote",
+   "mean_z": 3.14,
+   "median_z": 3.16,
+   "detected_p1e6": 0.0083,
+   "slots_retained": 0.493
+  },
+  {
+   "tier": "ab",
+   "attack": "sentences_cut_10pct",
+   "mean_z": 4.09,
+   "median_z": 4.12,
+   "detected_p1e6": 0.175,
+   "slots_retained": 0.901
+  },
+  {
+   "tier": "ab",
+   "attack": "sentences_cut_30pct",
+   "mean_z": 3.33,
+   "median_z": 3.32,
+   "detected_p1e6": 0.0083,
+   "slots_retained": 0.687
+  },
+  {
+   "tier": "ab",
+   "attack": "sentences_cut_50pct",
+   "mean_z": 2.74,
+   "median_z": 2.83,
+   "detected_p1e6": 0.0,
+   "slots_retained": 0.508
+  },
+  {
+   "tier": "ab",
+   "attack": "proofreader_10pct",
+   "mean_z": 3.81,
+   "median_z": 3.85,
+   "detected_p1e6": 0.0917,
+   "slots_retained": 0.933
+  },
+  {
+   "tier": "ab",
+   "attack": "print_hyphenation",
+   "mean_z": 4.35,
+   "median_z": 4.32,
+   "detected_p1e6": 0.2833,
+   "slots_retained": 0.989
+  },
+  {
+   "tier": "ab",
+   "attack": "house_style_normaliser",
+   "mean_z": 3.63,
+   "median_z": 3.71,
+   "detected_p1e6": 0.125,
+   "slots_retained": 1.0
+  },
+  {
+   "tier": "all",
+   "attack": "verbatim",
+   "mean_z": 7.13,
+   "median_z": 7.06,
+   "detected_p1e6": 0.9667,
+   "slots_retained": 1.0
+  },
+  {
+   "tier": "all",
+   "attack": "reflow_72col",
+   "mean_z": 7.13,
+   "median_z": 7.06,
+   "detected_p1e6": 0.9667,
+   "slots_retained": 1.0
+  },
+  {
+   "tier": "all",
+   "attack": "lowercased",
+   "mean_z": 7.13,
+   "median_z": 7.06,
+   "detected_p1e6": 0.9667,
+   "slots_retained": 1.0
+  },
+  {
+   "tier": "all",
+   "attack": "middle_50pct_quote",
+   "mean_z": 5.0,
+   "median_z": 5.06,
+   "detected_p1e6": 0.6167,
+   "slots_retained": 0.497
+  },
+  {
+   "tier": "all",
+   "attack": "sentences_cut_10pct",
+   "mean_z": 6.22,
+   "median_z": 6.31,
+   "detected_p1e6": 0.8917,
+   "slots_retained": 0.896
+  },
+  {
+   "tier": "all",
+   "attack": "sentences_cut_30pct",
+   "mean_z": 5.09,
+   "median_z": 5.15,
+   "detected_p1e6": 0.6417,
+   "slots_retained": 0.689
+  },
+  {
+   "tier": "all",
+   "attack": "sentences_cut_50pct",
+   "mean_z": 3.96,
+   "median_z": 3.9,
+   "detected_p1e6": 0.2083,
+   "slots_retained": 0.504
+  },
+  {
+   "tier": "all",
+   "attack": "proofreader_10pct",
+   "mean_z": 6.12,
+   "median_z": 6.2,
+   "detected_p1e6": 0.8417,
+   "slots_retained": 0.958
+  },
+  {
+   "tier": "all",
+   "attack": "print_hyphenation",
+   "mean_z": 6.85,
+   "median_z": 6.76,
+   "detected_p1e6": 0.9333,
+   "slots_retained": 0.995
+  },
+  {
+   "tier": "all",
+   "attack": "house_style_normaliser",
+   "mean_z": 5.86,
+   "median_z": 5.93,
+   "detected_p1e6": 0.7667,
+   "slots_retained": 1.0
+  }
+ ]
+}

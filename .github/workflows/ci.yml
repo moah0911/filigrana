@@ -1,0 +1,60 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dev tooling
+        run: uv sync --locked --dev
+      - name: Lint (ruff)
+        run: uv run ruff check src/ tools/ tests/
+      - name: Types (mypy)
+        run: uv run mypy
+      - name: Tests
+        run: >
+          uv run pytest
+          --cov=inkmark --cov-report=term-missing --cov-fail-under=85
+
+  # Optional-dependency tiers get a real job rather than a hope: the Ed25519 manifest and
+  # the WordNet provider both carry skip-guards, so plain dev-dep CI never exercises them.
+  # `lm` (torch) is left out of default CI on cost; its pure seams are unit-tested without
+  # torch, and tools/measure_lm_gate.py documents the full model-gated run.
+  optional-extras:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.13"
+      - name: Install with sign + lexical extras
+        run: uv sync --locked --dev --extra sign --extra lexical
+      - name: Tests (Ed25519 and WordNet tiers included)
+        run: uv run pytest
+
+  benchmarks:
+    # Reproducibility of the quoted numbers, at CI-affordable article counts; the exact
+    # 60-article sweep that produced bench/*.json still belongs to a workstation.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.13"
+      - name: Install dev tooling
+        run: uv sync --locked --dev
+      - name: Density and null calibration
+        run: uv run python tools/measure_free_choices.py --corpus corpus --lengths 1075 --keys 6
+      - name: Attack sweep
+        run: uv run python tools/attack_eval.py --corpus corpus --articles 20 --words 2500
