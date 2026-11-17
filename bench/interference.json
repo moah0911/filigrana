@@ -1,0 +1,46 @@
+{
+ "articles": 60,
+ "words": 1075,
+ "tier": "all",
+ "seed": 20261106,
+ "slots_spent_by_style_guard": 50,
+ "total_slots": 1581,
+ "rows": [
+  {
+   "metric": "burstiness",
+   "marked_minus_original": -0.04541,
+   "with_style_guard": -0.04541,
+   "rose_in": 13
+  },
+  {
+   "metric": "ttr",
+   "marked_minus_original": 0.00528,
+   "with_style_guard": 0.00487,
+   "rose_in": 55
+  },
+  {
+   "metric": "long_rate",
+   "marked_minus_original": 0.00067,
+   "with_style_guard": 6e-05,
+   "rose_in": 50
+  },
+  {
+   "metric": "cliches_per_1k",
+   "marked_minus_original": -0.07901,
+   "with_style_guard": -0.07901,
+   "rose_in": 11
+  },
+  {
+   "metric": "connective_rate",
+   "marked_minus_original": 0.0,
+   "with_style_guard": 0.0,
+   "rose_in": 0
+  },
+  {
+   "metric": "slop_rate",
+   "marked_minus_original": 0.00066,
+   "with_style_guard": -0.00012,
+   "rose_in": 39
+  }
+ ]
+}

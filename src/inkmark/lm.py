@@ -300,6 +300,11 @@ class GatedResult:
     provider: str
     gate: dict
     sidecar: dict
+    # Substitutions written during convergence. The `.edits` property below counts what a
+    # re-embed of the fixed point would still change -- zero at convergence -- so a
+    # measurement tool must report this field instead: the cost happened across rounds,
+    # not after the last one.
+    edits_applied: int = 0
 
     @property
     def slots(self) -> int:
@@ -319,7 +324,8 @@ class GatedResult:
             f" via {self.provider} + {self.model_id}, stable after {self.rounds} pass(es)\n"
             f"  {100 * self.retained:.1f}% re-derive from the marked copy alone; mean log-prob"
             f" shift {self.logprob_shift:+.4f}/token\n"
-            f"  {self.edits} edits, {sum(1 for e in self.entries if e.vetted)} declined"
+            f"  {self.edits_applied} edits applied across rounds, "
+            f"{sum(1 for e in self.entries if e.vetted)} declined"
         )
 
 
@@ -346,6 +352,7 @@ def embed_gated(
     current = text
     entries: list[Entry] = []
     rounds = 0
+    applied = 0
     from .embed import apply_diff
 
     for rounds in range(1, max_rounds + 1):
@@ -361,6 +368,7 @@ def embed_gated(
             mode="embed",
         )
         nxt = apply_diff(current, entries)
+        applied += sum(1 for entry in entries if entry.final != entry.observed)
         if nxt == current:
             break
         current = nxt
@@ -394,6 +402,7 @@ def embed_gated(
         model_id=scorer.model_id,
         provider=type(provider).__name__,
         gate=gate_conf,
+        edits_applied=applied,
         sidecar=build_sidecar(
             final_entries,
             key_id=key.key_id,

@@ -122,7 +122,7 @@ def main(argv: list[str] | None = None) -> int:
                 decision = scan_gated(marked.text, key, provider, scorer, gate=gate)
                 zs.append(decision.z)
                 ret.append(marked.retained)
-                edits.append(marked.edits)
+                edits.append(marked.edits_applied)
                 shifts.append(marked.logprob_shift)
                 slots.append(marked.slots)
             rows.append(

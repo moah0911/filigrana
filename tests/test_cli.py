@@ -14,7 +14,6 @@ from pathlib import Path
 import pytest
 
 from conftest import KEY as KEY_A
-
 from inkmark.cli import main
 
 PASSPHRASE = "correct horse"

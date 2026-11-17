@@ -54,6 +54,12 @@ def test_embed_gated_converges_and_rescans_identically():
     assert decision.slots == marked.slots, "the verifier must find the same slots"
     assert decision.hits == decision.slots
     assert marked.retained == pytest.approx(1.0, abs=1e-9)
+    # At a fixed point a re-embed changes nothing (`edits` == 0), but the cost of
+    # convergence was paid across rounds and must be reported as such. A measurement tool
+    # printing `edits` would claim the gateway is free exactly when it is not.
+    assert marked.edits_applied >= 1 or marked.edits == 0
+    if marked.edits_applied >= 1:
+        assert marked.edits == 0, "convergence means no pending edits; cost is edits_applied"
 
 
 def test_embed_gated_never_upgrades_a_word_the_model_dislikes():
@@ -131,8 +137,7 @@ def test_gate_counts_what_it_refuses_and_why():
 
 
 def test_gate_word_shaped_filtering_refuses_odd_surfaces():
-    """Html bits and short heads were never a word the writer chose."""
-    script = {"grayishnot": {"grayishnot": -1.0, "greyishnot": -1.1}}
+    """Odd surfaces never were a word the writer chose."""
     scoring = _pass("the grayishnot horizon")
     report = _gate().apply(
         scoring.tokens, ScriptedProvider(SCRIPT).slots("the grayishnot horizon", scoring.tokens),
@@ -142,7 +147,6 @@ def test_gate_word_shaped_filtering_refuses_odd_surfaces():
 
 
 def test_gate_never_kicks_the_observed_word_out_of_the_band():
-    script = {"purple": {"purple": -1.0, "violet": -1.1, "lavender": -1.2, "mauve": -1.3}}
     scoring = _pass("the purple sky")
     provider = ScriptedProvider(SCRIPT)
     report = FreeChoiceGate(epsilon=0.5, max_members=2).apply(
