@@ -31,7 +31,13 @@ def _passphrase(confirm: bool = False) -> str:
     from_env = os.environ.get("INKMARK_PASSPHRASE")
     if from_env:
         return from_env
-    first = getpass.getpass("inkmark passphrase: ")
+    try:
+        first = getpass.getpass("inkmark passphrase: ")
+    except EOFError:
+        # No TTY (cron, CI, a piped script): a traceback tells nobody anything.
+        raise SystemExit(
+            "inkmark: a passphrase is required. Run interactively, or set INKMARK_PASSPHRASE."
+        ) from None
     if confirm:
         second = getpass.getpass("again: ")
         if first != second:

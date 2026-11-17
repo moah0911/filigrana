@@ -147,3 +147,27 @@ def test_rewriting_a_marked_word_out_of_its_class_drops_only_that_slot():
         assert decision.hits == decision.slots
         return
     pytest.skip("none of the expected surfaces occurred")
+
+
+def test_detect_with_a_sidecar_never_claims_text_alone():
+    """The caveat list must tell the truth about which material the verdict rests on. It
+    used to print "computed from the text alone" even when a sidecar had been consumed --
+    a tool that lies about its own provenance in the same breath as its statistic cannot
+    be trusted on anything else."""
+    from inkmark.detect import scan
+
+    marked = embed(
+        "She walked slowly toward the grey station, and the crowd parted before the "
+        "engineers marched off into the rain. Nobody said that the report was anything "
+        "other than confidential, and afterwards the judgement varied among them.",
+        KEY,
+        table=default_table("all"),
+    )
+    ledger = json.dumps(marked.sidecar())
+    ledger = json.loads(ledger)
+    decision = scan(marked.text, KEY, table=default_table("all"), sidecar=ledger)
+    text = " ".join(decision.caveats)
+    assert "Computed from the text alone" not in text
+    assert "Verified against the sidecar's publication-time ledger" in text
+    alone = scan(marked.text, KEY, table=default_table("all"))
+    assert "Computed from the text alone" in " ".join(alone.caveats)

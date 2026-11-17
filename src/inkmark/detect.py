@@ -40,12 +40,16 @@ def score_entries(entries, *, words: int, key, n_hypotheses: int = 1, sidecar=No
         tiers[entry.tier] = tiers.get(entry.tier, 0) + 1
 
     caveats: list[str] = [
-        ("Computed from the text alone: no sidecar, so the verifier re-derived which choices "
-        "were free. A sidecar from publication time is strictly stronger."),
         ("Detects an intact or lightly edited copy. Measured prior art puts full paraphrase "
         "and translation at zero survival -- the words carry the mark, so rewriting the words "
         "removes it."),
     ]
+    if sidecar is None:
+        caveats.insert(
+            0,
+            "Computed from the text alone: no sidecar, so the verifier re-derived which "
+            "choices were free. A sidecar from publication time is strictly stronger.",
+        )
     if len(entries) < MIN_SLOTS:
         caveats.append(
             f"Only {len(entries)} key-correlated choices in {words} words; below {MIN_SLOTS} "
@@ -57,9 +61,11 @@ def score_entries(entries, *, words: int, key, n_hypotheses: int = 1, sidecar=No
         caveats.append("key_revoked")
     if sidecar is not None:
         recorded = len(sidecar.get("slots", []))
-        caveats.append(
-            f"Sidecar listed {recorded} slots at publication; {len(entries)} still "
-            "re-derivable from this copy."
+        caveats.insert(
+            0,
+            f"Verified against the sidecar's publication-time ledger: {len(entries)} of the "
+            f"{recorded} recorded slots re-derive from this copy. No equivalence table or "
+            "model was needed.",
         )
     if n_hypotheses > 1:
         caveats.append(
