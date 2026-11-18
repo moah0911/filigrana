@@ -10,12 +10,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        # Intel rather than macos-latest: arm64 macOS runners have repeatedly failed to
+        # provision on this repository, while macos-15-intel is a supported label through
+        # August 2027 and gives the same Python coverage.
+        os: [ubuntu-latest, macos-15-intel]
         python-version: ["3.11", "3.12", "3.13"]
         exclude:
-          - os: macos-latest
+          - os: macos-15-intel
             python-version: "3.11"
-          - os: macos-latest
+          - os: macos-15-intel
             python-version: "3.13"
     steps:
       - uses: actions/checkout@v4
