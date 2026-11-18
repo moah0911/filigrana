@@ -39,7 +39,13 @@ def _passphrase(confirm: bool = False) -> str:
             "inkmark: a passphrase is required. Run interactively, or set INKMARK_PASSPHRASE."
         ) from None
     if confirm:
-        second = getpass.getpass("again: ")
+        try:
+            second = getpass.getpass("again: ")
+        except EOFError:
+            raise SystemExit(
+                "inkmark: confirmation prompt lost its stdin; run interactively, "
+                "or set INKMARK_PASSPHRASE."
+            ) from None
         if first != second:
             raise SystemExit("passphrases did not match")
     return first
@@ -93,7 +99,15 @@ def cmd_embed(args: argparse.Namespace) -> int:
             return False
         source = text[slot.start : slot.end]
         members = table.classes[slot.class_id].members
-        answer = input(f"key wants {members[wanted]!r} for {source!r} [{'/'.join(members)}] (y/N) ")
+        prompt = f"key wants {members[wanted]!r} for {source!r} [{'/'.join(members)}] (y/N) "
+        try:
+            answer = input(prompt)
+        except EOFError:
+            # `inkmark embed --interactive < piped-script` must not traceback mid-veto.
+            raise SystemExit(
+                "inkmark: --interactive needs a terminal to ask you per slot; "
+                "re-run without --interactive or with a real stdin."
+            ) from None
         return answer.strip().lower() in ("y", "yes")
 
     result = embed(
@@ -149,20 +163,26 @@ def cmd_detect(args: argparse.Namespace) -> int:
     if args.payload_bits:
         best = max(keys, key=lambda k: scan(text, k, table=table).z)
         read = read_payload(text, best, args.payload_bits, table=table)
-        value = read.payload
-        if value is None:
-            print(
-                f"payload      undecoded: {read.unresolved} of {args.payload_bits} bits tied, "
-                f"{read.inconclusive} slots carried no information"
-            )
-            print("             this is the tier-2 discovery path failing the way it should: "
-                  "the text is too short for the bits, not evidence against the writer.")
-        else:
-            writer_id, published, crc_ok = decode_identity(value, args.payload_bits)
-            print(f"payload      0x{value:x} -> writer id 0x{writer_id:x}, published {published}")
-            print(f"checksum     {'ok' if crc_ok else 'MISMATCH - decode is not trustworthy'}")
-            print(f"weakest bit  p = {read.weakest:.3g}")
+        _report_payload(read, args.payload_bits)
     return 0
+
+
+def _report_payload(read, n_bits: int) -> None:
+    """Print a tier-2 payload read. Separated from cmd_detect so both outcomes are
+    testable without the ~60,000 words the 45-bit wire format genuinely needs."""
+    value = read.payload
+    if value is None:
+        print(
+            f"payload      undecoded: {read.unresolved} of {n_bits} bits tied, "
+            f"{read.inconclusive} slots carried no information"
+        )
+        print("             this is the tier-2 discovery path failing the way it should: "
+              "the text is too short for the bits, not evidence against the writer.")
+    else:
+        writer_id, published, crc_ok = decode_identity(value, n_bits)
+        print(f"payload      0x{value:x} -> writer id 0x{writer_id:x}, published {published}")
+        print(f"checksum     {'ok' if crc_ok else 'MISMATCH - decode is not trustworthy'}")
+        print(f"weakest bit  p = {read.weakest:.3g}")
 
 
 def cmd_table(args: argparse.Namespace) -> int:

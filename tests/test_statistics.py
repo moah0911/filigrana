@@ -8,11 +8,13 @@ false confidence. Both are tested here against the public-domain corpus when it 
 
 import math
 import random
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
 
-from inkmark.detect import scan
+from inkmark.decisions import Decision, normal_tail
+from inkmark.detect import scan, scan_against
 from inkmark.embed import embed
 from inkmark.keyring import WriterKey
 from inkmark.ledger import walk
@@ -160,3 +162,49 @@ def test_crc8_and_identity_round_trip():
     corrupt = decode_identity(encode_identity("a1b2c3d4e5f60718", "2026-11-07")[0] ^ 1 << 3)
     assert not corrupt[2], "a flipped bit must fail the checksum, not decode a writer"
     assert crc8(0) == 0
+
+
+class TestNormalTailGuards:
+    """normal_tail is exact erfc in the middle; the clamps exist so an absurd z can never
+    manufacture a fake non-zero p through float rounding."""
+
+    def test_extremes_clamp(self):
+        assert normal_tail(-8.5) == 1.0
+        assert normal_tail(8.5) == 0.0
+
+    def test_the_centre_and_the_verdict_threshold(self):
+        assert normal_tail(0.0) == 0.5
+        assert normal_tail(1.96) == pytest.approx(0.024997895148220435, abs=1e-12)
+        assert normal_tail(4.754) == pytest.approx(1e-6, abs=1e-8)
+
+
+def test_evidence_bits_refuse_to_score_a_degenerate_test():
+    empty = Decision(
+        slots=0, hits=0, expected=0.0, variance=0.0, z=0.0, p_value=1.0,
+        key_id="k", fingerprint="f",
+    )
+    assert empty.evidence_bits == 0.0
+    # a negative z is evidence AGAINST this key; it must claim no evidence for it
+    against = replace(empty, variance=2.0, z=-1.5, p_value=0.9)
+    assert against.evidence_bits == 0.0
+
+
+def test_render_shows_the_payload_line_with_or_without_confidence():
+    base = dict(
+        slots=10, hits=9, expected=5.0, variance=2.2, z=2.7, p_value=0.003,
+        key_id="k", fingerprint="f", words=100,
+    )
+    plain = Decision(**base, payload=0x123, payload_bits=24)
+    assert "payload    0x123 (24 bits)" in plain.render()
+    confident = Decision(**base, payload=0x123, payload_bits=24, payload_confidence=0.01)
+    assert "decoder confidence p = 0.01" in confident.render()
+
+
+def test_scan_against_never_runs_with_zero_keys():
+    with pytest.raises(ValueError, match="no keys given"):
+        scan_against("she walked slowly toward the grey station", [])
+
+
+def test_walk_of_an_empty_text_is_empty():
+    key = WriterKey(secret=b"1" * 32, key_id="empty", created="", year=2026)
+    assert walk("", key, default_table("all"), mode="detect") == []

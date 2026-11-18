@@ -113,3 +113,37 @@ def test_synthid_config_import_fails_loudly_without_the_extra():
             synthid.watermarking_config(KEY)
     else:  # pragma: no cover - depends on the extra
         assert synthid.watermarking_config(KEY).ngram_len in range(4, 8)
+
+
+class TestKeyringLifecycle:
+    def test_rotation_burns_the_old_mark(self):
+        key = WriterKey(secret=b"5" * 32, key_id="prov", created="", year=2026)
+        rotated = key.rotate()
+        assert rotated.fingerprint != key.fingerprint
+        assert rotated.epoch == key.epoch + 1
+        assert rotated.key_id != key.key_id
+        assert rotated.year == key.year
+
+    def test_a_foreign_keyring_file_is_named_as_such(self, tmp_path):
+        bogus = tmp_path / "bogus.json"
+        bogus.write_text('{"format": "some-other-tool/1"}')
+        with pytest.raises(ValueError, match="not an inkmark keyring file"):
+            WriterKey.load(bogus, "pw")
+
+    def test_a_foreign_manifest_is_named_as_such(self):
+        with pytest.raises(ValueError, match="not an inkmark manifest"):
+            Manifest.from_json('{"format": "nope/1"}')
+
+    def test_a_foreign_registry_is_named_as_such(self):
+        with pytest.raises(ValueError, match="not an inkmark registry"):
+            Registry.from_json('{"format": "nope/1"}')
+
+
+def test_entry_domains_are_lowercase_hosts_or_nothing():
+    assert Entry("1", "f", "ada", url="https://Example.org/ada/post").domains == ["example.org"]
+    assert Entry("1", "f", "ada").domains == []
+
+
+def test_registry_iteration_is_sorted_by_writer_id():
+    entries = [Entry("c", "f1", "c"), Entry("a", "f2", "a"), Entry("b", "f3", "b")]
+    assert [e.writer_id for e in Registry(entries)] == ["a", "b", "c"]

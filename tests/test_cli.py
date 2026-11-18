@@ -15,6 +15,7 @@ import pytest
 
 from conftest import KEY as KEY_A
 from inkmark.cli import main
+from inkmark.codec import BitVote, PayloadRead
 
 PASSPHRASE = "correct horse"
 
@@ -230,3 +231,176 @@ class TestPassphraseHandling:
             run("key", "new", "--out", str(home / "fresh.json"))
         assert "did not match" in str(exc.value)
         assert list(home.rglob("keyring.json")) == rings_before
+
+
+class TestInteractiveVeto:
+    """--interactive asks per slot; every answer shape must land, including EOF mid-prompt."""
+
+    ESSAY = "she walked slowly toward the grey station and the crowd parted"
+
+    def test_vetoing_every_prompt_keeps_the_writers_words(self, home, monkeypatch, capsys):
+        # The prompt is "(y/N)": yes = veto this edit and keep your own word.
+        monkeypatch.setattr("builtins.input", lambda *a: "y")
+        essay = home / "essay.md"
+        essay.write_text(self.ESSAY)
+        out_path = home / "marked.md"
+        assert run(
+            "embed", str(essay), "--key", str(_key_path(home)), "--tier", "all",
+            "--interactive", "--out", str(out_path),
+        ) == 0
+        out = capsys.readouterr().out
+        assert "declined by you" in out and "0 declined by you" not in out
+        assert out_path.read_text() == self.ESSAY, "a vetoed slot must keep your own word"
+
+    def test_accepting_every_prompt_applies_the_key(self, home, monkeypatch, capsys):
+        monkeypatch.setattr("builtins.input", lambda *a: "n")
+        essay = home / "essay.md"
+        essay.write_text(self.ESSAY)
+        assert run(
+            "embed", str(essay), "--key", str(_key_path(home)), "--tier", "all",
+            "--interactive", "--out", str(home / "marked.md"),
+        ) == 0
+        assert "0 declined by you" in capsys.readouterr().out
+
+    def test_eof_mid_veto_exits_cleanly(self, home, monkeypatch):
+        def refuse(*a):
+            raise EOFError
+
+        monkeypatch.setattr("builtins.input", refuse)
+        essay = home / "essay.md"
+        essay.write_text(self.ESSAY)
+        with pytest.raises(SystemExit) as exc:
+            run(
+                "embed", str(essay), "--key", str(_key_path(home)), "--tier", "all",
+                "--interactive", "--out", str(home / "marked.md"),
+            )
+        assert "interactive needs a terminal" in str(exc.value)
+
+    def test_lost_first_prompt_stdin_exits_cleanly(self, home, monkeypatch):
+        import getpass
+
+        monkeypatch.delenv("INKMARK_PASSPHRASE", raising=False)
+
+        def refuse(*a):
+            raise EOFError
+
+        monkeypatch.setattr(getpass, "getpass", refuse)
+        with pytest.raises(SystemExit) as exc:
+            run("key", "show")
+        assert "a passphrase is required" in str(exc.value)
+
+    def test_lost_confirmation_stdin_exits_cleanly(self, home, monkeypatch):
+        import getpass
+
+        monkeypatch.delenv("INKMARK_PASSPHRASE", raising=False)
+        calls = iter(["first", EOFError()])
+
+        def prompt(*a):
+            item = next(calls)
+            if isinstance(item, Exception):
+                raise item
+            return item
+
+        monkeypatch.setattr(getpass, "getpass", prompt)
+        with pytest.raises(SystemExit) as exc:
+            run("key", "new", "--out", str(home / "fresh.json"))
+        assert "confirmation prompt lost its stdin" in str(exc.value)
+
+
+class TestTableSlotsFrom:
+    def test_table_counts_the_slots_of_a_file(self, home, capsys):
+        essay = home / "essay.md"
+        essay.write_text("she walked slowly toward the grey station and the crowd parted")
+        assert run("table", "--tier", "all", "--slots-from", str(essay)) == 0
+        out = capsys.readouterr().out
+        assert "words -> " in out and "per 1000 words" in out
+
+
+class TestDomainScopedAttestation:
+    def test_publish_and_verify_agree_on_the_right_domain_only(self, home, capsys):
+        essay = home / "essay.md"
+        essay.write_text("she walked slowly toward the gray station\n")
+        manifest = home / "essay.inkmark.json"
+        assert run(
+            "publish", str(essay), "--key", str(_key_path(home)), "--handle", "ada",
+            "--domain", "example.org", "--out", str(manifest),
+        ) == 0
+        assert "scoped to    example.org" in capsys.readouterr().out
+        capsys.readouterr()
+        assert run(
+            "verify", str(essay), "--manifest", str(manifest), "--key", str(_key_path(home)),
+            "--domain", "example.org",
+        ) == 0
+        assert "attestation ok    True" in capsys.readouterr().out
+        capsys.readouterr()
+        assert run(
+            "verify", str(essay), "--manifest", str(manifest), "--key", str(_key_path(home)),
+            "--domain", "other.org",
+        ) == 0
+        out = capsys.readouterr().out
+        assert "text matches      True" in out
+        assert "attestation ok    False" in out, "a different domain is a different subkey"
+
+
+class TestPayloadReporting:
+    """_report_payload is extracted from cmd_detect so both outcomes are testable without
+    the ~60,000 words the 45-bit wire format genuinely needs."""
+
+    @staticmethod
+    def _votes(payload: int, n_bits: int) -> tuple:
+        return tuple(
+            BitVote(i, 1, 9) if (payload >> (n_bits - 1 - i)) & 1 else BitVote(i, 9, 1)
+            for i in range(n_bits)
+        )
+
+    def test_a_decoded_identity_reports_who_and_when(self, capsys):
+        from inkmark.cli import _report_payload
+        from inkmark.codec import encode_identity
+
+        payload, n_bits = encode_identity("62365a5464bdae5e", "2026-11-17")
+        read = PayloadRead(votes=self._votes(payload, n_bits), unresolved=0, inconclusive=3)
+        _report_payload(read, n_bits)
+        out = capsys.readouterr().out
+        assert f"0x{payload:x} -> writer id 0x62365a, published 2026-11-17" in out
+        assert "checksum     ok" in out
+        assert "weakest bit" in out
+
+    def test_a_checksum_mismatch_is_said_out_loud(self, capsys):
+        from inkmark.cli import _report_payload
+        from inkmark.codec import encode_identity
+
+        payload, n_bits = encode_identity("62365a5464bdae5e", "2026-11-17")
+        corrupt = payload ^ (1 << 7)
+        read = PayloadRead(votes=self._votes(corrupt, n_bits), unresolved=0, inconclusive=0)
+        _report_payload(read, n_bits)
+        assert "MISMATCH - decode is not trustworthy" in capsys.readouterr().out
+
+    def test_an_undecodable_payload_never_invents_an_author(self, capsys):
+        from inkmark.cli import _report_payload
+
+        _report_payload(PayloadRead(votes=(), unresolved=37, inconclusive=15), 45)
+        out = capsys.readouterr().out
+        assert "undecoded: 37 of 45 bits tied, 15 slots carried no information" in out
+        assert "not evidence against the writer" in out
+
+    def test_detect_on_a_short_essay_reports_the_payload_honestly(self, home, capsys):
+        essay = home / "essay.md"
+        essay.write_text("she walked slowly toward the grey station and the crowd parted")
+        assert run(
+            "detect", str(essay), "--key", str(_key_path(home)), "--tier", "all",
+            "--payload-bits", "45",
+        ) == 0
+        out = capsys.readouterr().out
+        assert "undecoded" in out and "bits tied" in out
+
+
+def test_module_entry_point_prints_the_version():
+    import subprocess
+
+    proc = subprocess.run(
+        [sys.executable, "-m", "inkmark", "--version"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert proc.stdout.strip().startswith("inkmark 0.")

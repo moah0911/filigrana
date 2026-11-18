@@ -165,3 +165,33 @@ def test_gate_drops_below_the_word_length_floor():
         scoring.tokens, provider.slots("the fox slept", scoring.tokens), scoring.logprob_of
     )
     assert report.thin >= 1, "a three-character candidate is below the floor by construction"
+
+
+def test_gated_result_reports_density_and_distinguishes_cost_from_fixed_point():
+    """`.edits` counts what a re-embed at the fixed point would still change (zero), while
+    `edits_applied` counts what was actually written across rounds. A measurement tool
+    must report the latter, or the style cost reads as free."""
+    from inkmark.ledger import Entry
+    from inkmark.lm import GatedResult
+
+    entry = Entry(
+        class_id="sc:walked", tier="lm", start=0, end=6,
+        members=("walked", "strolled"), observed=0, wanted=1, final=0,
+        bit=None, vetted=False,
+    )
+    result = GatedResult(
+        text="", entries=(entry,), words=100, rounds=2, retained=1.0,
+        logprob_shift=0.0, model_id="m", provider="p", gate={}, sidecar={},
+        edits_applied=3,
+    )
+    assert result.slots == 1
+    assert result.rho == pytest.approx(10.0)  # 1000 * slots / words
+    assert result.edits == 0, "at the fixed point a re-embed would change nothing"
+    assert "3 edits applied across rounds" in result.summary()
+    assert "0 declined" in result.summary()
+
+    empty = GatedResult(
+        text="", entries=(), words=0, rounds=0, retained=0.0,
+        logprob_shift=0.0, model_id="m", provider="p", gate={}, sidecar={},
+    )
+    assert empty.rho == 0.0, "max(words, 1) keeps the density defined for empty text"

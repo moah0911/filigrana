@@ -9,6 +9,7 @@ import re
 
 import pytest
 
+from inkmark.canon import canonical_form
 from inkmark.keyring import WriterKey
 from inkmark.ledger import walk
 from inkmark.providers import default_table
@@ -110,3 +111,36 @@ def test_deleting_one_slot_disturbs_only_a_window():
     removed = ARTICLE.replace("Although it was early,", "It was early,", 1)
     survivors = [e.class_id for e in walk(removed, KEY, TABLE)]
     assert survivors[2:] == slots[3:]
+
+
+def test_an_unterminated_fence_still_shields_its_words():
+    # Forgetting to close a code fence is a real writer error; the words inside must
+    # not become slots just because the markup is malformed.
+    text = "```py\nshe walked slowly toward the station\n"
+    assert walk(text, KEY, TABLE) == []
+    assert canonical_form(text) == ""
+
+
+def test_inline_code_never_becomes_a_slot():
+    text = "the `walked slowly` path stayed on the record"
+    assert walk(text, KEY, TABLE) == []
+    assert canonical_form(text) == "the path stayed on the record"
+
+
+def test_link_labels_are_prose_but_urls_are_not():
+    text = "she [walked](https://example.org/w) toward the hills"
+    entries = walk(text, KEY, TABLE)
+    assert len(entries) == 1, "the label keeps its slot; the URL must not add one"
+    assert entries[0].class_id == "a.toward"
+    assert "https" not in canonical_form(text)
+
+
+def test_relabel_carries_the_originals_case_pattern():
+    from inkmark.canon import relabel
+
+    assert relabel("Judgement", "judgment") == "Judgment"
+    assert relabel("JUDGEMENT", "judgment") == "JUDGMENT"
+    assert relabel("judgement", "judgment") == "judgment"
+    assert relabel("A", "big") == "Big"
+    assert relabel("", "judgment") == "judgment"
+    assert relabel("plain", "Judgment") == "Judgment"  # no pattern to carry

@@ -106,7 +106,10 @@ def is_slop(surface: str) -> bool:
     if lowered in SLOP_WORDS:
         return True
     first = lowered.split()[0] if lowered else ""
-    return first in SLOP_WORDS and lowered != first  # "owing to" counts, bare "owing" does not
+    # Multi-word members key on their first word; bare members count by direct membership
+    # ('owing' is itself listed, so bare 'owing' counts too). This list feeds the measured
+    # slop_rate in bench/interference.json -- change it only with a re-run of that bench.
+    return first in SLOP_WORDS and lowered != first
 
 
 def slop_predicate(surface: str) -> bool:

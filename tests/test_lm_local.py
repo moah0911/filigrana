@@ -96,3 +96,37 @@ def test_a_text_longer_than_the_position_table_scores_every_row_without_error():
     index = len(tokenize(text)) - 10
     late = scoring.logprob_of(index, ("walked", "strolled"))
     assert any(math.isfinite(x) for x in late), (tokenize(text)[index].surface, late)
+
+
+def test_logprob_of_the_first_word_is_impossible_everywhere():
+    """The first word has no predicting row (the BOS piece owns row 0), so every member is
+    -inf there. The gate must read that as 'no information', never as 'perfect evidence'."""
+    from inkmark.lm import LocalModelScorer
+
+    scorer = LocalModelScorer(**SCORER_ARGS)
+    pas = scorer.score("she walked slowly toward the grey station and the crowd parted")
+    assert pas.logprob_of(0, ("walked", "strolled")) == (-math.inf, -math.inf)
+
+
+def test_mean_logprob_is_zero_for_a_fragment_and_negative_for_prose():
+    from inkmark.lm import LocalModelScorer
+
+    scorer = LocalModelScorer(**SCORER_ARGS)
+    assert scorer.score("a").mean_logprob() == 0.0  # under two BPE pieces: nothing to condition on
+    prose = scorer.score("she walked slowly toward the grey station and the crowd parted")
+    value = prose.mean_logprob()
+    assert math.isfinite(value) and value < 0
+
+
+def test_propose_filters_a_gate_required_provider_through_a_real_pass():
+    """WordNet proposals are sense-blind; `lm.propose` is the seam where a real model's
+    band test turns them into a report. Whatever it keeps or drops, it must report."""
+    from inkmark.gate import FreeChoiceGate
+    from inkmark.lexical import WordNetProvider
+    from inkmark.lm import LocalModelScorer, propose
+
+    scorer = LocalModelScorer(**SCORER_ARGS)
+    text = "she carried the weight of the whole argument"
+    pas = scorer.score(text)
+    report = propose(WordNetProvider(), text, pas, FreeChoiceGate())
+    assert report.summary()

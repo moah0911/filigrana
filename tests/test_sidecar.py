@@ -171,3 +171,33 @@ def test_detect_with_a_sidecar_never_claims_text_alone():
     assert "Verified against the sidecar's publication-time ledger" in text
     alone = scan(marked.text, KEY, table=default_table("all"))
     assert "Computed from the text alone" in " ".join(alone.caveats)
+
+
+def test_locate_drops_a_span_that_runs_off_the_end_of_the_copy():
+    """A truncated copy must neither crash nor mis-score: a multi-word member whose span
+    extends past the end of the text simply cannot match, and the slot is absent."""
+    marked = _marked()
+    ledger = json.loads(json.dumps(marked.sidecar()))
+    full = locate(marked.text, ledger)
+    entry = next(e for e in full if " " in e.members[e.observed])
+    truncated = marked.text[: entry.start + len(entry.members[entry.observed].split()[0])]
+    remaining = locate(truncated, ledger)
+    assert entry.class_id not in {e.class_id for e in remaining}
+    assert [e.class_id for e in remaining] == [
+        e.class_id for e in full if e.end <= entry.start
+    ], "records wholly before the cut still re-derive, in order"
+    decision = verify(truncated, KEY, ledger)
+    assert decision.hits == decision.slots, "a lost slot is absent, not a disagreement"
+
+
+def test_locate_drops_a_slot_whose_anchor_no_longer_matches():
+    marked = _marked()
+    ledger = json.loads(json.dumps(marked.sidecar()))
+    full = locate(marked.text, ledger)
+    assert full
+    broken = json.loads(json.dumps(marked.sidecar()))
+    broken["slots"][0]["anchor"] = ["xyzzy", "plugh"]
+    remaining = locate(marked.text, broken)
+    assert [e.class_id for e in remaining] == [e.class_id for e in full[1:]], (
+        "a slot whose anchor was edited is dropped, and the rest locate untouched"
+    )

@@ -42,7 +42,7 @@ class Inflection:
     suffix: str
 
     def form(self, other_lemma: str) -> str:
-        return other_lemma + self.suffix
+        return _y_spell(other_lemma, self.suffix)
 
     def inflect(self, other_lemma: str) -> str | None:
         """Re-inflect a sibling lemma the way the observed word was inflected, or refuse.
@@ -52,18 +52,36 @@ class Inflection:
         Irregular forms cannot be fixed from a lemma list at all -- they get pruned by the
         band filter, which is the design, not an apology: a model gives `speaked` a
         probability of essentially zero in every context. What is fixed here is the
-        self-evident nonsense: doubled suffixes and plural spelling.
+        self-evident nonsense: doubled suffixes, plural spelling, and the y -> i family.
         """
         if self.suffix in ("ed", "ing", "ly") and other_lemma.endswith(self.suffix):
             return None  # `quick` + `ly` is fine; `quickly` + `ly` is `quicklyly`
         if self.suffix == "s" and other_lemma.endswith(("s", "x", "z", "ch", "sh")):
             other_lemma += "e"  # bunch -> bunches, not bunchs
-        candidate = other_lemma + self.suffix
+        candidate = _y_spell(other_lemma, self.suffix)
         return candidate if re.fullmatch(r"[a-z]{4,}", candidate) else None
 
     @property
     def required_pos(self) -> tuple[str, ...]:
         return tuple(SUFFIX_POS.get(self.suffix) or ())
+
+
+def _y_spell(lemma: str, suffix: str) -> str:
+    """Regular y-family spelling: carry+s -> carries, carry+ed -> carried, happy+ly -> happily.
+
+    Only a consonant before the y triggers the swap: plays, days and say+s keep the y,
+    and -ing never changes it (carrying is carry+ing, appended as-is).
+    """
+    if (
+        suffix in ("s", "ed", "ly")
+        and len(lemma) >= 2
+        and lemma.endswith("y")
+        and lemma[-2] not in "aeiouy"
+    ):
+        if suffix == "s":
+            return lemma[:-1] + "ies"
+        return lemma[:-1] + ("ied" if suffix == "ed" else "ily")
+    return lemma + suffix
 
 
 def parse_inflection(surface: str) -> Inflection | None:
@@ -82,17 +100,27 @@ def parse_inflection(surface: str) -> Inflection | None:
                 return Inflection(lemma, suffix)
         return None
     if word.endswith("ed"):
-        for lemma in (word[:-2], word[:-1]):
+        # `carried` -> carry by the regular y -> i swap; `died` stays die+ed.
+        candidates: tuple[str, ...]
+        candidates = (word[:-2], word[:-1], word[:-3] + "y") if word.endswith("ied") else (word[:-2], word[:-1])
+        for lemma in candidates:
             if len(lemma) >= 3 and _lemma_known(lemma):
                 return Inflection(lemma, "ed")
         return None
     if word.endswith("ly"):
-        lemma = word[:-2]
-        if _lemma_known(lemma):
-            return Inflection(lemma, "ly")
+        # `happily` -> happy, `warily` -> wary; plain `quickly` -> quick stays first.
+        candidates = (word[:-2], word[:-3] + "y") if word.endswith("ily") else (word[:-2],)
+        for lemma in candidates:
+            if _lemma_known(lemma):
+                return Inflection(lemma, "ly")
         return None
     if word.endswith("s") and not word.endswith(("ss", "us", "is")):
-        for lemma in (word[:-1], word[:-2] if word.endswith(("ies", "es")) else word[:-1]):
+        s_candidates = [word[:-1]]
+        if word.endswith("ies"):
+            s_candidates.append(word[:-3] + "y")  # carries -> carry, studies -> study
+        elif word.endswith("es"):
+            s_candidates.append(word[:-2])
+        for lemma in s_candidates:
             if len(lemma) >= 3 and _lemma_known(lemma):
                 return Inflection(lemma, "s")
         return None
