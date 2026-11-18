@@ -9,8 +9,8 @@ from __future__ import annotations
 
 import pytest
 
-from inkmark.integrations import synthid
-from inkmark.keyring import WriterKey
+from filigrana.integrations import synthid
+from filigrana.keyring import WriterKey
 
 KEY = WriterKey(secret=b"8" * 32, key_id="synthid-test", created="", year=2026)
 OTHER = WriterKey(secret=b"9" * 32, key_id="synthid-other", created="", year=2026)

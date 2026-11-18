@@ -1,5 +1,5 @@
-key        ink-2026-00-640b3d07  fingerprint 5e1bb4fb670791d3
-length     140 words, 23 key-correlated choices  (a:6, b:12, c:5)
+key        fil-2026-00-DEMO  fingerprint DEMO-FINGERPRINT
+length     143 words, 23 key-correlated choices  (a:6, b:12, c:5)
 agreement  21/23 slots on the key's side (chance would give 11.3)
 statistics z = 4.04, p = 2.66e-05
 strength   15.2 bits of evidence against chance

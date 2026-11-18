@@ -6,12 +6,12 @@ The realistic harm is not a broken statistic, it is someone quoting a statistic 
 
 import pytest
 
-from inkmark.codec import crc8, decode_identity, encode_identity, read_payload
-from inkmark.decisions import Decision
-from inkmark.detect import scan, scan_against
-from inkmark.embed import embed
-from inkmark.keyring import WriterKey
-from inkmark.providers import default_table
+from filigrana.codec import PayloadRead, crc8, decode_identity, encode_identity, read_payload
+from filigrana.decisions import Decision
+from filigrana.detect import scan, scan_against
+from filigrana.embed import embed
+from filigrana.keyring import WriterKey
+from filigrana.providers import default_table
 
 TABLE = default_table("all")
 TEXT = (
@@ -133,3 +133,12 @@ def test_payload_decode_needs_length_and_says_so():
     assert read.slots if hasattr(read, "slots") else True
     assert read.payload == payload, [(v.index, v.zero, v.one) for v in read.votes]
     assert read.inconclusive > 0, "half of all 2-way slots carry no bit by construction"
+
+
+def test_payload_reading_refuses_a_zero_bit_wire():
+    with pytest.raises(ValueError, match="n_bits must be positive"):
+        read_payload(TEXT, key(0), 0, table=TABLE)
+
+
+def test_an_empty_payload_read_cannot_invent_a_value():
+    assert PayloadRead(votes=(), unresolved=0, inconclusive=0).payload is None

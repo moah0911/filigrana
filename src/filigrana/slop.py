@@ -44,7 +44,7 @@ CLICHE_PATTERNS = [
 ]
 
 #: Words that read as machine-generated filler where nothing requires them. Several are
-#: members of inkmark's own equivalence classes -- `nevertheless`, `frequently`,
+#: members of filigrana's own equivalence classes -- `nevertheless`, `frequently`,
 #: `hence`, `owing to` -- which is precisely the collision this module exists to manage.
 SLOP_WORDS = frozenset(
     """moreover furthermore nevertheless subsequently approximately utilize delve tapestry

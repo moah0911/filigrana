@@ -148,7 +148,7 @@ def _wordnet():
         from nltk.corpus import wordnet
     except ImportError as exc:  # pragma: no cover - depends on the extra
         raise ImportError(
-            "WordNetProvider needs 'inkmark[lexical]' and a WordNet corpus: "
+            "WordNetProvider needs 'filigrana[lexical]' and a WordNet corpus: "
             "uv pip install nltk && python -c \"import nltk; nltk.download('wordnet'); "
             "nltk.download('omw-1.4')\""
         ) from exc

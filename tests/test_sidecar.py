@@ -17,11 +17,11 @@ import json
 import pytest
 
 from conftest import KEY, SCRIPT, SENTENCE, ScriptedProvider, ScriptedScorer
-from inkmark.embed import embed
-from inkmark.keyring import WriterKey
-from inkmark.lm import embed_gated
-from inkmark.providers import default_table
-from inkmark.sidecar import build_sidecar, locate, verify
+from filigrana.embed import embed
+from filigrana.keyring import WriterKey
+from filigrana.lm import embed_gated
+from filigrana.providers import default_table
+from filigrana.sidecar import build_sidecar, locate, verify
 
 # Distinct paragraphs, not one repeated: a mark is a *local* pattern, so repeating a single
 # paragraph and then "shuffling" it would prove nothing about ordering, and would let a
@@ -55,7 +55,7 @@ def _marked():
 def test_curated_sidecar_verifies_without_a_model():
     marked = _marked()
     ledger = marked.sidecar()
-    assert ledger["format"] == "inkmark-sidecar/2"
+    assert ledger["format"] == "filigrana-sidecar/2"
     decision = verify(marked.text, KEY, ledger)
     assert decision.slots == marked.slots
     assert decision.hits == decision.slots
@@ -154,7 +154,7 @@ def test_detect_with_a_sidecar_never_claims_text_alone():
     used to print "computed from the text alone" even when a sidecar had been consumed --
     a tool that lies about its own provenance in the same breath as its statistic cannot
     be trusted on anything else."""
-    from inkmark.detect import scan
+    from filigrana.detect import scan
 
     marked = embed(
         "She walked slowly toward the grey station, and the crowd parted before the "
@@ -201,3 +201,38 @@ def test_locate_drops_a_slot_whose_anchor_no_longer_matches():
     assert [e.class_id for e in remaining] == [e.class_id for e in full[1:]], (
         "a slot whose anchor was edited is dropped, and the rest locate untouched"
     )
+
+
+def test_a_sidecar_from_another_format_is_refused():
+    with pytest.raises(ValueError, match="not a filigrana sidecar"):
+        locate("some text", {"format": "filigrana-sidecar/1", "slots": []})
+    with pytest.raises(ValueError, match="not a filigrana sidecar"):
+        verify("some text", KEY, {"format": "filigrana-sidecar/1", "slots": []})
+
+
+def test_a_malformed_slot_is_named_instead_of_crashing():
+    with pytest.raises(ValueError, match="non-empty list of words"):
+        locate(
+            "some text",
+            {
+                "format": "filigrana-sidecar/2",
+                "window": 4,
+                "reachable": [],
+                "slots": [{"class": "a.x", "members": [], "final": 0, "anchor": []}],
+            },
+        )
+
+
+def test_swapping_a_marked_word_inside_its_class_reads_as_absent_not_guilty():
+    """The published member index is part of the match. Two occurrences of a member can share
+    an anchor once reachable words are skipped; binding to the wrong one scored a published
+    word as present when the copy no longer contained it."""
+    marked = _marked()
+    ledger = marked.sidecar()
+    full = locate(marked.text, ledger)
+    entry = next(e for e in full if e.class_id == "a.toward" and e.n == 2)
+    replacement = entry.members[(entry.observed + 1) % entry.n]
+    edited = marked.text[: entry.start] + replacement + marked.text[entry.end :]
+    decision = verify(edited, KEY, ledger)
+    assert decision.slots == len(full) - 1, "the swapped slot is absent, not a disagreement"
+    assert decision.hits == decision.slots

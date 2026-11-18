@@ -19,4 +19,4 @@ American literary prose. It uses `towards`, `amongst`, `afterwards` and `-ise` s
 more than a 2026 magazine essay does, so `rho` for tier `a`/`b` is likely an *over*-estimate
 for modern AmE non-fiction and an *under*-estimate for modern BrE. It also contains no
 contractions at scale, so tier `c` density is understated. Run the tool on your own writing:
-`inkmark table --slots-from your-essay.md`.
+`filigrana table --slots-from your-essay.md`.

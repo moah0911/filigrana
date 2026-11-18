@@ -6,8 +6,8 @@ would be the kind of hubris that gets attributed to hobby projects. What is miss
 key management: the vendor configuration is one opaque list of integers, and a writer needs
 that list derived from -- and recoverable from -- their `WriterKey`.
 
-    from inkmark import WriterKey
-    from inkmark.integrations.synthid import watermarking_config
+    from filigrana import WriterKey
+    from filigrana.integrations.synthid import watermarking_config
     config = watermarking_config(key)
     out = model.generate(**inputs, watermarking_config=config, do_sample=True)
 
@@ -36,6 +36,8 @@ if TYPE_CHECKING:  # pragma: no cover
     from ..keyring import WriterKey
 
 N_KEYS = 24  # the paper's own recommendation is 20-30
+# Frozen pre-release domain separator; see keystream.SCHEME. Renaming the package must not
+# change the SynthID keys derived from an existing writer key.
 INFO = b"inkmark/1/synthid-keys"
 
 
@@ -78,7 +80,7 @@ def watermarking_config(key: WriterKey, *, n_keys: int = N_KEYS):
         from transformers import SynthIDTextWatermarkingConfig
     except ImportError as exc:  # pragma: no cover - depends on the extra
         raise ImportError(
-            "the logits path needs 'inkmark[lm]' (transformers>=4.46). The tier-1 path in "
+            "the logits path needs 'filigrana[lm]' (transformers>=4.46). The tier-1 path in "
             "this package needs nothing and works on prose you wrote by hand."
         ) from exc
     return SynthIDTextWatermarkingConfig(keys=synthid_keys(key, n_keys), ngram_len=ngram_len_for(key))

@@ -60,11 +60,9 @@ def score_entries(entries, *, words: int, key, n_hypotheses: int = 1, sidecar=No
     if getattr(key, "revoked", False):
         caveats.append("key_revoked")
     if sidecar is not None:
-        recorded = len(sidecar.get("slots", []))
         caveats.insert(
             0,
-            f"Verified against the sidecar's publication-time ledger: {len(entries)} of the "
-            f"{recorded} recorded slots re-derive from this copy. No equivalence table or "
+            "Verified against the sidecar's publication-time ledger: no equivalence table or "
             "model was needed.",
         )
     if n_hypotheses > 1:
@@ -100,6 +98,12 @@ def scan(
     sidecar: dict | None = None,
 ) -> Decision:
     """Tier-1 detection over the curated table. See `scan_lm` for the model-gated path."""
+    if sidecar is not None:
+        # Imported here because sidecar imports score_entries from this module. A supplied
+        # ledger must actually be used, not merely mentioned in a caveat.
+        from .sidecar import verify as verify_sidecar
+
+        return verify_sidecar(text, key, sidecar, n_hypotheses=n_hypotheses)
     table = table or default_table()
     entries = walk(text, key, table, window=window, mode="detect")
     return score_entries(

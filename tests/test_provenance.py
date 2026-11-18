@@ -5,13 +5,13 @@ from __future__ import annotations
 
 import pytest
 
-from inkmark.canon import canonical_form
-from inkmark.embed import embed
-from inkmark.keyring import WriterKey
-from inkmark.manifest import Manifest, publish, verify
-from inkmark.providers import default_table
-from inkmark.registry import Entry, Registry, entry_for
-from inkmark.slop import SLOP_WORDS, is_slop, profile
+from filigrana.canon import canonical_form
+from filigrana.embed import embed
+from filigrana.keyring import WriterKey
+from filigrana.manifest import Manifest, publish, verify
+from filigrana.providers import default_table
+from filigrana.registry import Entry, Registry, entry_for
+from filigrana.slop import SLOP_WORDS, is_slop, profile
 
 KEY = WriterKey(secret=b"5" * 32, key_id="m-2026-00", created="2026-01-01", year=2026)
 TEXT = (
@@ -91,7 +91,7 @@ def test_multiword_slop_members_are_judged_on_their_head_word():
 
 def test_synthid_keys_are_derived_and_rotatable():
     """Rebuildable from the keyring alone -- a lost HF config must not mean a lost mark."""
-    from inkmark.integrations.synthid import ngram_len_for, synthid_keys
+    from filigrana.integrations.synthid import ngram_len_for, synthid_keys
 
     keys = synthid_keys(KEY)
     assert keys == synthid_keys(KEY)
@@ -104,12 +104,12 @@ def test_synthid_keys_are_derived_and_rotatable():
 
 def test_synthid_config_import_fails_loudly_without_the_extra():
     """Silent degradation here would mean a writer believes an unmarked draft is marked."""
-    from inkmark.integrations import synthid
+    from filigrana.integrations import synthid
 
     try:
         import transformers  # noqa: F401
     except ImportError:
-        with pytest.raises(ImportError, match=r"inkmark\[lm\]"):
+        with pytest.raises(ImportError, match=r"filigrana\[lm\]"):
             synthid.watermarking_config(KEY)
     else:  # pragma: no cover - depends on the extra
         assert synthid.watermarking_config(KEY).ngram_len in range(4, 8)
@@ -127,16 +127,30 @@ class TestKeyringLifecycle:
     def test_a_foreign_keyring_file_is_named_as_such(self, tmp_path):
         bogus = tmp_path / "bogus.json"
         bogus.write_text('{"format": "some-other-tool/1"}')
-        with pytest.raises(ValueError, match="not an inkmark keyring file"):
+        with pytest.raises(ValueError, match="not a filigrana keyring file"):
             WriterKey.load(bogus, "pw")
 
     def test_a_foreign_manifest_is_named_as_such(self):
-        with pytest.raises(ValueError, match="not an inkmark manifest"):
+        with pytest.raises(ValueError, match="not a filigrana manifest"):
             Manifest.from_json('{"format": "nope/1"}')
 
     def test_a_foreign_registry_is_named_as_such(self):
-        with pytest.raises(ValueError, match="not an inkmark registry"):
+        with pytest.raises(ValueError, match="not a filigrana registry"):
             Registry.from_json('{"format": "nope/1"}')
+
+    def test_a_manifest_missing_its_required_fields_is_refused(self):
+        with pytest.raises(ValueError, match="missing or not a string"):
+            Manifest.from_json('{"format": "filigrana-manifest/1"}')
+
+    def test_a_registry_whose_entries_are_not_a_list_is_refused(self):
+        with pytest.raises(ValueError, match="'entries' must be a list"):
+            Registry.from_json('{"format": "filigrana-registry/1", "entries": {}}')
+
+    def test_a_malformed_registry_entry_is_named(self):
+        with pytest.raises(ValueError, match="malformed registry entry"):
+            Registry.from_json(
+                '{"format": "filigrana-registry/1", "entries": [{"handle": "ada"}]}'
+            )
 
 
 def test_entry_domains_are_lowercase_hosts_or_nothing():

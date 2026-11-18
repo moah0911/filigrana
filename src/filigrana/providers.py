@@ -2,7 +2,7 @@
 
 This table is the only reason a watermark can touch human text at all, so it lives in data
 rather than code -- it needs auditing, versioning, and disagreement. Everything else in
-`inkmark` treats it as a given.
+`filigrana` treats it as a given.
 
 A class is admissible only if every member is substitutable for every other member in
 every context the class appears in: symmetric, not merely "usually synonymous". Direction
@@ -34,6 +34,23 @@ from .canon import Token, tokenize
 
 _CLAUSE_END = re.compile(r"[.,;:!?]")
 _NUMERAL = re.compile(r"\d")
+_TIER_LETTERS = "abc"
+
+
+def normalise_tier(value: str) -> str:
+    """Canonical tier spec: sorted, de-duplicated a/b/c letters, or ``all``.
+
+    Accepting ``"ba"`` and returning ``"ab"`` keeps the CLI forgiving without letting a
+    typo like ``"xyz"`` silently produce a table with no classes at all.
+    """
+
+    text = value.strip().lower()
+    if text == "all":
+        return "all"
+    letters = frozenset(text)
+    if not letters or not letters <= frozenset(_TIER_LETTERS):
+        raise ValueError(f"tier must be a, b, c, ab, ac, bc, abc, or all, not {value!r}")
+    return "".join(letter for letter in _TIER_LETTERS if letter in letters)
 
 
 class AmbiguousSurface(Exception):
@@ -139,9 +156,12 @@ class CuratedTable:
     @classmethod
     def load(cls, tier: str = "ab") -> "CuratedTable":
         raw = json.loads(
-            files("inkmark.data").joinpath("equivalence.json").read_text(encoding="utf-8")
+            files("filigrana.data").joinpath("equivalence.json").read_text(encoding="utf-8")
         )
-        allowed = frozenset("abc") if tier == "all" else frozenset(tier)
+        if not isinstance(raw, dict) or not isinstance(raw.get("classes"), list):
+            raise ValueError("equivalence table must be a JSON object with a 'classes' list")
+        canonical = normalise_tier(tier)
+        allowed = frozenset(_TIER_LETTERS) if canonical == "all" else frozenset(canonical)
         classes = []
         for item in raw["classes"]:
             if item["tier"] not in allowed:
@@ -259,4 +279,5 @@ __all__ = [
     "EquivalenceClass",
     "Slot",
     "default_table",
+    "normalise_tier",
 ]

@@ -29,14 +29,14 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from inkmark.detect import scan
-from inkmark.embed import embed
-from inkmark.gate import FreeChoiceGate
-from inkmark.keyring import WriterKey
-from inkmark.lexical import WordNetProvider
-from inkmark.lm import embed_gated, scan_gated
-from inkmark.providers import default_table
-from inkmark.sidecar import verify
+from filigrana.detect import scan
+from filigrana.embed import embed
+from filigrana.gate import FreeChoiceGate
+from filigrana.keyring import WriterKey
+from filigrana.lexical import WordNetProvider
+from filigrana.lm import embed_gated, scan_gated
+from filigrana.providers import default_table
+from filigrana.sidecar import verify
 
 
 def sample_articles(corpus: Path, count: int, words: int, seed: int) -> list[str]:
@@ -105,7 +105,7 @@ def main(argv: list[str] | None = None) -> int:
             )
         )
 
-    from inkmark.lm import LocalModelScorer
+    from filigrana.lm import LocalModelScorer
 
     scorer = LocalModelScorer(args.model)
     for epsilon in (float(x) for x in args.epsilons.split(",")):

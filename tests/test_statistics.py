@@ -13,12 +13,12 @@ from pathlib import Path
 
 import pytest
 
-from inkmark.decisions import Decision, normal_tail
-from inkmark.detect import scan, scan_against
-from inkmark.embed import embed
-from inkmark.keyring import WriterKey
-from inkmark.ledger import walk
-from inkmark.providers import default_table
+from filigrana.decisions import Decision, normal_tail
+from filigrana.detect import scan, scan_against
+from filigrana.embed import embed
+from filigrana.keyring import WriterKey
+from filigrana.ledger import walk
+from filigrana.providers import default_table
 
 CORPUS = Path(__file__).resolve().parent.parent / "corpus"
 has_corpus = CORPUS.glob("*.txt") and any(CORPUS.glob("*.txt"))
@@ -129,7 +129,7 @@ def test_caveats_state_the_attacks_that_work():
 def test_bit_votes_resolve_by_majority_and_refuse_ties():
     """Tier 2 reads the payload by voting the slots assigned to each bit. A tie must be an
     unresolved bit, not a verdict, and the reported p is the excess over a fair 50/50."""
-    from inkmark.codec import BitVote, PayloadRead
+    from filigrana.codec import BitVote, PayloadRead
 
     assert BitVote(0, 3, 1).resolved == 0
     assert BitVote(0, 1, 3).resolved == 1
@@ -151,7 +151,7 @@ def test_bit_votes_resolve_by_majority_and_refuse_ties():
 def test_crc8_and_identity_round_trip():
     """The 24+13+8 wire format must survive an encode/decode round trip and a corrupted
     decode must be visible as a CRC failure rather than a confident wrong author."""
-    from inkmark.codec import crc8, decode_identity, encode_identity
+    from filigrana.codec import crc8, decode_identity, encode_identity
 
     for fingerprint, day in (("a1b2c3d4e5f60718", 2498), ("0f1e2d3c4b5a6978", 0)):
         payload, bits = encode_identity(fingerprint, "2026-11-07")

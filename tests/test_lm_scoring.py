@@ -1,12 +1,12 @@
 """The window planner: longertexts must not open a seam in the mark.
 
-`plan_windows` is the only model-facing arithmetic in `inkmark` that has to be *exact* about
+`plan_windows` is the only model-facing arithmetic in `filigrana` that has to be *exact* about
 position arithmetic: a window covering the wrong rows would silently let gated slots score
 themselves against no context at all, and nothing downstream would notice. These tests pin
 the three invariants that make the composition correct, with no torch in sight.
 """
 
-from inkmark.lm import WINDOW_CONTEXT, plan_windows
+from filigrana.lm import WINDOW_CONTEXT, plan_windows
 
 
 def _invariants(n: int, max_positions: int, context: int = WINDOW_CONTEXT):

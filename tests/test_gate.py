@@ -5,9 +5,9 @@ from __future__ import annotations
 import pytest
 
 from conftest import KEY, SCRIPT, SENTENCE, FakePass, ScriptedProvider, ScriptedScorer
-from inkmark.canon import tokenize
-from inkmark.gate import FreeChoiceGate
-from inkmark.lm import embed_gated, scan_gated
+from filigrana.canon import tokenize
+from filigrana.gate import FreeChoiceGate
+from filigrana.lm import embed_gated, scan_gated
 
 
 def _pass(text: str) -> FakePass:
@@ -81,7 +81,7 @@ def test_gated_result_exposes_a_sidecar_that_names_the_model():
 
 
 def test_wordnet_proposes_regular_siblings_and_refuses_irregular_ones():
-    from inkmark.lexical import WordNetProvider, parse_inflection
+    from filigrana.lexical import WordNetProvider, parse_inflection
 
     _require_wordnet()
 
@@ -109,7 +109,7 @@ def _require_wordnet() -> None:
 
 
 def test_wordnet_provider_cannot_be_embedded_without_a_gate():
-    from inkmark.lexical import WordNetProvider
+    from filigrana.lexical import WordNetProvider
 
     _require_wordnet()
 
@@ -171,8 +171,8 @@ def test_gated_result_reports_density_and_distinguishes_cost_from_fixed_point():
     """`.edits` counts what a re-embed at the fixed point would still change (zero), while
     `edits_applied` counts what was actually written across rounds. A measurement tool
     must report the latter, or the style cost reads as free."""
-    from inkmark.ledger import Entry
-    from inkmark.lm import GatedResult
+    from filigrana.ledger import Entry
+    from filigrana.lm import GatedResult
 
     entry = Entry(
         class_id="sc:walked", tier="lm", start=0, end=6,

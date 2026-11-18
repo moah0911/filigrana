@@ -1,4 +1,4 @@
-"""The Ed25519 tier of the manifest, when `inkmark[sign]` is installed.
+"""The Ed25519 tier of the manifest, when `filigrana[sign]` is installed.
 
 Everything here skips cleanly without `cryptography`, which is the point of the tier: the
 default HMAC path runs on stdlib alone, and the public-key path refuses to pretend with
@@ -7,8 +7,8 @@ hand-rolled curve arithmetic. Where the optional dependency exists its behaviour
 
 import pytest
 
-from inkmark.canon import canonical_form
-from inkmark.manifest import (
+from filigrana.canon import canonical_form
+from filigrana.manifest import (
     Manifest,
     generate_signing_pair,
     publish,
@@ -31,7 +31,7 @@ def _signed_manifest(private) -> Manifest:
     )
 
 
-from inkmark.keyring import WriterKey  # noqa: E402
+from filigrana.keyring import WriterKey  # noqa: E402
 
 KEY_SIGNER = WriterKey(secret=b"6" * 32, key_id="sign-test", created="", year=2026)
 

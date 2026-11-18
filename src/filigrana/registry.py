@@ -2,7 +2,7 @@
 
 Tier 2 decodes a 24-bit writer id out of the wording. That id means nothing without a
 mapping to a name, and the moment you build the mapping centrally you have built a
-deanonymisation service -- so `inkmark` does not. A registry is a static JSON document a
+deanonymisation service -- so `filigrana` does not. A registry is a static JSON document a
 writer publishes on their own site, the same way they would publish a fingerprint or a PGP
 key. Anyone may read it; nobody operates it.
 
@@ -17,7 +17,7 @@ from collections.abc import Iterable, Iterator
 from dataclasses import asdict, dataclass
 from datetime import date
 
-FORMAT = "inkmark-registry/1"
+FORMAT = "filigrana-registry/1"
 
 
 @dataclass(frozen=True, slots=True)
@@ -73,10 +73,21 @@ class Registry:
 
     @classmethod
     def from_json(cls, blob: str) -> "Registry":
-        data = json.loads(blob)
+        try:
+            data = json.loads(blob)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"registry is not valid JSON: {exc.msg}") from None
+        if not isinstance(data, dict):
+            raise ValueError("a filigrana registry must be a JSON object")
         if data.get("format") != FORMAT:
-            raise ValueError("not an inkmark registry")
-        return cls(Entry(**item) for item in data["entries"])
+            raise ValueError("not a filigrana registry")
+        entries = data.get("entries")
+        if not isinstance(entries, list):
+            raise ValueError("registry 'entries' must be a list")
+        try:
+            return cls(Entry(**item) for item in entries)
+        except TypeError as exc:
+            raise ValueError(f"malformed registry entry: {exc}") from None
 
     def __len__(self) -> int:
         return len(self._by_id)

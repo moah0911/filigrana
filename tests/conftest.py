@@ -9,9 +9,9 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 
-from inkmark.canon import tokenize
-from inkmark.keyring import WriterKey
-from inkmark.providers import Slot
+from filigrana.canon import tokenize
+from filigrana.keyring import WriterKey
+from filigrana.providers import Slot
 
 KEY = WriterKey(secret=b"4" * 32, key_id="gate-test", created="", year=2026)
 

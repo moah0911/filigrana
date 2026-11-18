@@ -6,7 +6,7 @@ artifacts were generated with, including the multi-word rule ('owing to' keys on
 word, and 'owing' is itself a listed member).
 """
 
-from inkmark.slop import SLOP_WORDS, StyleProfile, is_slop, profile, slop_predicate
+from filigrana.slop import SLOP_WORDS, StyleProfile, is_slop, profile, slop_predicate
 
 
 class TestIsSlop:

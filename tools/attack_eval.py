@@ -20,11 +20,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from inkmark.detect import scan
-from inkmark.embed import embed
-from inkmark.keyring import WriterKey
-from inkmark.ledger import word_count
-from inkmark.providers import default_table
+from filigrana.detect import scan
+from filigrana.embed import embed
+from filigrana.keyring import WriterKey
+from filigrana.ledger import word_count
+from filigrana.providers import default_table
 
 Z = 4.754
 

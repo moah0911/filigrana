@@ -23,7 +23,7 @@ def _wordnet_corpus():
         pytest.skip("WordNet corpus missing: python -c \"import nltk; nltk.download('wordnet')\"")
 
 
-from inkmark.lexical import Inflection, WordNetProvider, parse_inflection  # noqa: E402
+from filigrana.lexical import Inflection, WordNetProvider, parse_inflection  # noqa: E402
 
 
 class TestSuffixMachine:
@@ -136,8 +136,8 @@ def test_propose_refuses_a_gate_required_provider_without_a_scorer():
     # that can say which candidates the model finds plausible. `tokens` alone is not enough.
     from types import SimpleNamespace
 
-    from inkmark.gate import FreeChoiceGate
-    from inkmark.lm import propose
+    from filigrana.gate import FreeChoiceGate
+    from filigrana.lm import propose
 
     scoring = SimpleNamespace(tokens=[])
     with pytest.raises(TypeError, match="sense-blind"):

@@ -3,7 +3,7 @@
 This is the surface a writer actually touches, and for a long time it had not a single test
 line behind it -- every number quoted in the README was checked at the library layer only.
 These tests run the real `main()` against an isolated HOME, so a bug in argument wiring, the
-~/.inkmark default, or the rendered output shows up here rather than in a writer's hands.
+~/.filigrana default, or the rendered output shows up here rather than in a writer's hands.
 """
 
 import json
@@ -14,19 +14,19 @@ from pathlib import Path
 import pytest
 
 from conftest import KEY as KEY_A
-from inkmark.cli import main
-from inkmark.codec import BitVote, PayloadRead
+from filigrana.cli import main
+from filigrana.codec import BitVote, PayloadRead
 
 PASSPHRASE = "correct horse"
 
 
 @pytest.fixture
 def home(tmp_path, monkeypatch):
-    """Isolated HOME + INKMARK_PASSPHRASE so nothing real is touched."""
+    """Isolated HOME + FILIGRANA_PASSPHRASE so nothing real is touched."""
     monkeypatch.setenv("HOME", str(tmp_path))
-    monkeypatch.setenv("INKMARK_PASSPHRASE", PASSPHRASE)
+    monkeypatch.setenv("FILIGRANA_PASSPHRASE", PASSPHRASE)
     monkeypatch.chdir(tmp_path)
-    keyfile = tmp_path / ".inkmark" / "keyring.json"
+    keyfile = tmp_path / ".filigrana" / "keyring.json"
     KEY_A.save(keyfile, PASSPHRASE)
     return tmp_path
 
@@ -36,22 +36,22 @@ def run(*argv: str) -> int:
 
 
 def _key_path(home: Path) -> Path:
-    return home / ".inkmark" / "keyring.json"
+    return home / ".filigrana" / "keyring.json"
 
 
 class TestKeyCommands:
     def test_key_new_writes_an_encrypted_ring_and_prints_the_fingerprint(self, home, capsys):
         assert run("key", "new", "--out", str(_key_path(home))) == 0
         out = capsys.readouterr().out
-        assert home / ".inkmark" / "keyring.json" in list(home.rglob("keyring.json"))
+        assert home / ".filigrana" / "keyring.json" in list(home.rglob("keyring.json"))
         blob = json.loads((_key_path(home)).read_text())
-        assert blob["format"] == "inkmark-keyring/1"
+        assert blob["format"] == "filigrana-keyring/1"
         assert blob["fingerprint"] in out
         mode = (_key_path(home)).stat().st_mode & 0o777
         assert mode == 0o600, "must refuse group/world access, or anyone can forge the writer"
 
     def test_key_show_reports_key_id_and_writer_id(self, home, capsys):
-        from inkmark.codec import writer_id_from
+        from filigrana.codec import writer_id_from
 
         assert run("key", "show", "--key", str(_key_path(home))) == 0
         out = capsys.readouterr().out
@@ -63,9 +63,10 @@ class TestKeyCommands:
         missing = home / "nowhere" / "keyring.json"
         essay = home / "essay.md"
         essay.write_text("she walked slowly toward the grey station")
-        with pytest.raises(SystemExit) as exc:
-            run("detect", str(essay), "--key", str(missing), "--key", str(_key_path(home)))
-        assert "inkmark key new" in str(exc.value)
+        assert run(
+            "detect", str(essay), "--key", str(missing), "--key", str(_key_path(home))
+        ) == 2
+        assert "filigrana key new" in capsys.readouterr().err
 
 
 class TestEmbedCommand:
@@ -90,7 +91,7 @@ class TestEmbedCommand:
         assert f"wrote {out_file}" in out
         assert out_file.exists() and sidecar.exists()
         record = json.loads(sidecar.read_text())
-        assert record["format"] == "inkmark-sidecar/2"
+        assert record["format"] == "filigrana-sidecar/2"
         assert record["slots"], "the sidecar must publish the per-slot ledger"
 
     def test_embed_payload_encodes_identity_and_date(self, home, capsys):
@@ -108,7 +109,7 @@ class TestDetectCommand:
     def test_detect_prints_the_statistic_and_never_a_verdict(self, home, capsys):
         essay = home / "essay.md"
         essay.write_text("she walked slowly toward the grey station and the crowd parted")
-        from inkmark.embed import embed
+        from filigrana.embed import embed
 
         marked = embed(essay.read_text(), KEY_A, payload=None, n_bits=0)
         (home / "marked.md").write_text(marked.text)
@@ -131,7 +132,7 @@ class TestDetectCommand:
         assert "z = " in out
 
     def test_detect_with_two_keys_prints_the_multiplicity_correction(self, home, capsys):
-        from inkmark.keyring import WriterKey
+        from filigrana.keyring import WriterKey
 
         second = home / "second.json"
         WriterKey.generate().save(second, PASSPHRASE)
@@ -164,7 +165,7 @@ class TestPublishAndVerify:
     def test_publish_then_verify_round_trips_the_claims(self, home, capsys):
         essay = home / "essay.md"
         essay.write_text("she walked slowly toward the gray station\n")
-        manifest = home / "essay.inkmark.json"
+        manifest = home / "essay.filigrana.json"
         assert run(
             "publish", str(essay), "--key", str(_key_path(home)), "--handle", "ada",
             "--published", "2026-11-07", "--out", str(manifest),
@@ -181,7 +182,7 @@ class TestPublishAndVerify:
     def test_verify_of_an_edited_copy_reports_an_edit_not_a_broken_signature(self, home, capsys):
         essay = home / "essay.md"
         essay.write_text("she walked slowly toward the gray station\n")
-        manifest = home / "essay.inkmark.json"
+        manifest = home / "essay.filigrana.json"
         run(
             "publish", str(essay), "--key", str(_key_path(home)), "--handle", "ada", "--out", str(manifest)
         )
@@ -198,7 +199,7 @@ class TestPublishAndVerify:
 
 class TestRegistry:
     def test_registry_add_and_dump_resolves_the_writer_id(self, home, capsys):
-        from inkmark.codec import writer_id_from
+        from filigrana.codec import writer_id_from
 
         registry = home / "reg.json"
         assert run("registry", "--file", str(registry), "--add", "ada", "--key", str(_key_path(home))) == 0
@@ -211,25 +212,25 @@ class TestRegistry:
 
 
 class TestPassphraseHandling:
-    def test_env_passphrase_beats_the_prompt_and_bad_passphrase_is_named(self, home, monkeypatch):
-        monkeypatch.setenv("INKMARK_PASSPHRASE", "wrong")
-        with pytest.raises(SystemExit) as exc:
-            run("key", "show")
-        assert "bad passphrase" in str(exc.value)
-        monkeypatch.delenv("INKMARK_PASSPHRASE")
+    def test_env_passphrase_beats_the_prompt_and_bad_passphrase_is_named(
+        self, home, monkeypatch, capsys
+    ):
+        monkeypatch.setenv("FILIGRANA_PASSPHRASE", "wrong")
+        assert run("key", "show") == 2
+        assert "bad passphrase" in capsys.readouterr().err
+        monkeypatch.delenv("FILIGRANA_PASSPHRASE")
         monkeypatch.setattr("builtins.input", lambda *a, _k="": "")
         monkeypatch.setattr(sys, "stdin", open(os.devnull))
 
-    def test_mismatched_confirmation_never_mints_a_keyring(self, home, monkeypatch):
+    def test_mismatched_confirmation_never_mints_a_keyring(self, home, monkeypatch, capsys):
         rings_before = list(home.rglob("keyring.json"))
-        monkeypatch.delenv("INKMARK_PASSPHRASE", raising=False)
+        monkeypatch.delenv("FILIGRANA_PASSPHRASE", raising=False)
         import getpass
 
         answers = iter(["one", "two"])
         monkeypatch.setattr(getpass, "getpass", lambda *a: next(answers))
-        with pytest.raises(SystemExit) as exc:
-            run("key", "new", "--out", str(home / "fresh.json"))
-        assert "did not match" in str(exc.value)
+        assert run("key", "new", "--out", str(home / "fresh.json")) == 2
+        assert "did not match" in capsys.readouterr().err
         assert list(home.rglob("keyring.json")) == rings_before
 
 
@@ -262,37 +263,35 @@ class TestInteractiveVeto:
         ) == 0
         assert "0 declined by you" in capsys.readouterr().out
 
-    def test_eof_mid_veto_exits_cleanly(self, home, monkeypatch):
+    def test_eof_mid_veto_exits_cleanly(self, home, monkeypatch, capsys):
         def refuse(*a):
             raise EOFError
 
         monkeypatch.setattr("builtins.input", refuse)
         essay = home / "essay.md"
         essay.write_text(self.ESSAY)
-        with pytest.raises(SystemExit) as exc:
-            run(
-                "embed", str(essay), "--key", str(_key_path(home)), "--tier", "all",
-                "--interactive", "--out", str(home / "marked.md"),
-            )
-        assert "interactive needs a terminal" in str(exc.value)
+        assert run(
+            "embed", str(essay), "--key", str(_key_path(home)), "--tier", "all",
+            "--interactive", "--out", str(home / "marked.md"),
+        ) == 2
+        assert "interactive needs a terminal" in capsys.readouterr().err
 
-    def test_lost_first_prompt_stdin_exits_cleanly(self, home, monkeypatch):
+    def test_lost_first_prompt_stdin_exits_cleanly(self, home, monkeypatch, capsys):
         import getpass
 
-        monkeypatch.delenv("INKMARK_PASSPHRASE", raising=False)
+        monkeypatch.delenv("FILIGRANA_PASSPHRASE", raising=False)
 
         def refuse(*a):
             raise EOFError
 
         monkeypatch.setattr(getpass, "getpass", refuse)
-        with pytest.raises(SystemExit) as exc:
-            run("key", "show")
-        assert "a passphrase is required" in str(exc.value)
+        assert run("key", "show") == 2
+        assert "a passphrase is required" in capsys.readouterr().err
 
-    def test_lost_confirmation_stdin_exits_cleanly(self, home, monkeypatch):
+    def test_lost_confirmation_stdin_exits_cleanly(self, home, monkeypatch, capsys):
         import getpass
 
-        monkeypatch.delenv("INKMARK_PASSPHRASE", raising=False)
+        monkeypatch.delenv("FILIGRANA_PASSPHRASE", raising=False)
         calls = iter(["first", EOFError()])
 
         def prompt(*a):
@@ -302,9 +301,8 @@ class TestInteractiveVeto:
             return item
 
         monkeypatch.setattr(getpass, "getpass", prompt)
-        with pytest.raises(SystemExit) as exc:
-            run("key", "new", "--out", str(home / "fresh.json"))
-        assert "confirmation prompt lost its stdin" in str(exc.value)
+        assert run("key", "new", "--out", str(home / "fresh.json")) == 2
+        assert "confirmation prompt lost its stdin" in capsys.readouterr().err
 
 
 class TestTableSlotsFrom:
@@ -316,11 +314,80 @@ class TestTableSlotsFrom:
         assert "words -> " in out and "per 1000 words" in out
 
 
+class TestFailurePaths:
+    """Every predictable user mistake must be one line on stderr and exit 2, never a traceback."""
+
+    def test_a_missing_input_file_is_named(self, home, capsys):
+        assert run("detect", str(home / "nope.md"), "--key", str(_key_path(home))) == 2
+        err = capsys.readouterr().err
+        assert "no such file" in err and "nope.md" in err
+
+    def test_a_directory_where_a_file_belongs_is_named(self, home, capsys):
+        assert run("embed", str(home), "--key", str(_key_path(home))) == 2
+        assert "is a directory" in capsys.readouterr().err
+
+    def test_invalid_sidecar_json_is_named_with_its_position(self, home, capsys):
+        essay = home / "essay.md"
+        essay.write_text("she walked slowly toward the grey station")
+        sidecar = home / "sidecar.json"
+        sidecar.write_text("{not json")
+        assert run(
+            "detect", str(essay), "--key", str(_key_path(home)), "--sidecar", str(sidecar)
+        ) == 2
+        err = capsys.readouterr().err
+        assert "not valid JSON" in err and "line" in err
+
+    def test_an_old_sidecar_format_is_refused(self, home, capsys):
+        essay = home / "essay.md"
+        essay.write_text("she walked slowly toward the grey station")
+        sidecar = home / "sidecar.json"
+        sidecar.write_text(json.dumps({"format": "filigrana-sidecar/1", "slots": []}))
+        assert run(
+            "detect", str(essay), "--key", str(_key_path(home)), "--sidecar", str(sidecar)
+        ) == 2
+        assert "not a filigrana sidecar" in capsys.readouterr().err
+
+    def test_a_manifest_missing_required_fields_is_named(self, home, capsys):
+        essay = home / "essay.md"
+        essay.write_text("she walked slowly toward the gray station\n")
+        manifest = home / "manifest.json"
+        manifest.write_text(json.dumps({"format": "filigrana-manifest/1"}))
+        assert run(
+            "verify", str(essay), "--manifest", str(manifest), "--key", str(_key_path(home))
+        ) == 2
+        assert "missing or not a string" in capsys.readouterr().err
+
+    def test_an_unwritable_output_is_reported_without_a_traceback(self, home, capsys):
+        essay = home / "essay.md"
+        essay.write_text("she walked slowly toward the grey station")
+        blocker = home / "blocked"
+        blocker.write_text("not a directory")
+        assert run(
+            "embed", str(essay), "--key", str(_key_path(home)),
+            "--out", str(blocker / "marked.md"),
+        ) == 2
+        assert "cannot write" in capsys.readouterr().err
+
+    @pytest.mark.parametrize(
+        "argv",
+        [
+            ("table", "--tier", "xyz"),
+            ("embed", "essay.md", "--payload", "ada,not-a-date"),
+            ("detect", "essay.md", "--key", "k", "--payload-bits", "0"),
+            ("publish", "essay.md", "--handle", "ada", "--published", "07/11/2026"),
+        ],
+    )
+    def test_invalid_arguments_exit_two(self, argv):
+        with pytest.raises(SystemExit) as exc:
+            run(*argv)
+        assert exc.value.code == 2
+
+
 class TestDomainScopedAttestation:
     def test_publish_and_verify_agree_on_the_right_domain_only(self, home, capsys):
         essay = home / "essay.md"
         essay.write_text("she walked slowly toward the gray station\n")
-        manifest = home / "essay.inkmark.json"
+        manifest = home / "essay.filigrana.json"
         assert run(
             "publish", str(essay), "--key", str(_key_path(home)), "--handle", "ada",
             "--domain", "example.org", "--out", str(manifest),
@@ -354,8 +421,8 @@ class TestPayloadReporting:
         )
 
     def test_a_decoded_identity_reports_who_and_when(self, capsys):
-        from inkmark.cli import _report_payload
-        from inkmark.codec import encode_identity
+        from filigrana.cli import _report_payload
+        from filigrana.codec import encode_identity
 
         payload, n_bits = encode_identity("62365a5464bdae5e", "2026-11-17")
         read = PayloadRead(votes=self._votes(payload, n_bits), unresolved=0, inconclusive=3)
@@ -366,8 +433,8 @@ class TestPayloadReporting:
         assert "weakest bit" in out
 
     def test_a_checksum_mismatch_is_said_out_loud(self, capsys):
-        from inkmark.cli import _report_payload
-        from inkmark.codec import encode_identity
+        from filigrana.cli import _report_payload
+        from filigrana.codec import encode_identity
 
         payload, n_bits = encode_identity("62365a5464bdae5e", "2026-11-17")
         corrupt = payload ^ (1 << 7)
@@ -376,7 +443,7 @@ class TestPayloadReporting:
         assert "MISMATCH - decode is not trustworthy" in capsys.readouterr().out
 
     def test_an_undecodable_payload_never_invents_an_author(self, capsys):
-        from inkmark.cli import _report_payload
+        from filigrana.cli import _report_payload
 
         _report_payload(PayloadRead(votes=(), unresolved=37, inconclusive=15), 45)
         out = capsys.readouterr().out
@@ -398,9 +465,9 @@ def test_module_entry_point_prints_the_version():
     import subprocess
 
     proc = subprocess.run(
-        [sys.executable, "-m", "inkmark", "--version"],
+        [sys.executable, "-m", "filigrana", "--version"],
         capture_output=True,
         text=True,
         check=True,
     )
-    assert proc.stdout.strip().startswith("inkmark 0.")
+    assert proc.stdout.strip().startswith("filigrana 0.")

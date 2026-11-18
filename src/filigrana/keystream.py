@@ -18,6 +18,8 @@ Two properties, both load-bearing:
 import hashlib
 import hmac
 
+# Frozen pre-release domain separator. This is part of the keyed-choice contract; renaming
+# the package must not change which word a given key demands.
 SCHEME = b"inkmark/1"
 
 

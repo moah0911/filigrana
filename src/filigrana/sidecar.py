@@ -21,7 +21,7 @@ from .detect import score_entries
 from .keystream import keyed_choice
 from .ledger import DEFAULT_WINDOW, Entry, anchor_before, word_count
 
-FORMAT = "inkmark-sidecar/2"
+FORMAT = "filigrana-sidecar/2"
 
 
 def build_sidecar(
@@ -67,49 +67,89 @@ def build_sidecar(
     return record
 
 
+def _require_sidecar(sidecar: dict) -> None:
+    if not isinstance(sidecar, dict):
+        raise ValueError("a sidecar must be a JSON object")
+    if sidecar.get("format") != FORMAT:
+        raise ValueError(f"not a filigrana sidecar (expected format {FORMAT!r})")
+    if not isinstance(sidecar.get("slots"), list):
+        raise ValueError("sidecar 'slots' must be a list")
+    window = sidecar.get("window", DEFAULT_WINDOW)
+    if not isinstance(window, int) or isinstance(window, bool) or window < 1:
+        raise ValueError("sidecar 'window' must be a positive integer")
+    reachable = sidecar.get("reachable", ())
+    if not isinstance(reachable, (list, tuple)) or not all(
+        isinstance(word, str) for word in reachable
+    ):
+        raise ValueError("sidecar 'reachable' must be a list of words")
+
+
 def locate(text: str, sidecar: dict) -> list[Entry]:
     """Re-derive entries from a suspect copy using only the published ledger.
 
     Left-to-right, one cursor, so two identical slots in the text cannot both claim the same
     record and a reordered paragraph simply fails to match rather than scoring as evidence.
     """
+    _require_sidecar(sidecar)
     tokens = tokenize(text)
     window = sidecar.get("window", DEFAULT_WINDOW)
     reachable = frozenset(sidecar.get("reachable", ()))
     cursor = 0
     found: list[Entry] = []
     for record in sidecar.get("slots", ()):
-        members = tuple(record["members"])
-        anchor = tuple(record.get("anchor", ()))
-        hit = _match(tokens, members, anchor, cursor, reachable, window)
+        if not isinstance(record, dict):
+            raise ValueError("malformed sidecar slot: each slot must be a JSON object")
+        members = record.get("members")
+        anchor = record.get("anchor", ())
+        class_id = record.get("class")
+        final = record.get("final")
+        if not isinstance(members, (list, tuple)) or not members or not all(
+            isinstance(member, str) and member for member in members
+        ):
+            raise ValueError("malformed sidecar slot: 'members' must be a non-empty list of words")
+        if not isinstance(anchor, (list, tuple)) or not all(
+            isinstance(word, str) for word in anchor
+        ):
+            raise ValueError("malformed sidecar slot: 'anchor' must be a list of words")
+        if not isinstance(class_id, str) or not class_id:
+            raise ValueError("malformed sidecar slot: 'class' must be a non-empty string")
+        if not isinstance(final, int) or isinstance(final, bool) or not 0 <= final < len(members):
+            raise ValueError("malformed sidecar slot: 'final' must index into 'members'")
+        hit = _match(tokens, tuple(members), tuple(anchor), cursor, reachable, window, final)
         if hit is None:
             continue
         position, observed, width = hit
         cursor = position + width
         found.append(
             Entry(
-                class_id=record["class"],
+                class_id=class_id,
                 tier=record.get("tier", "lm"),
                 start=tokens[position].start,
                 end=tokens[position + width - 1].end,
-                members=members,
+                members=tuple(members),
                 observed=observed,
                 wanted=-1,
-                final=record["final"],
+                final=observed,
                 bit=record.get("bit"),
                 vetted=bool(record.get("vetted")),
-                anchor=anchor,
+                anchor=tuple(anchor),
             )
         )
     return found
 
 
-def _match(tokens, members, anchor, cursor, reachable, window):
-    """Next slot after `cursor` whose surface is one of `members` with exactly `anchor` before.
+def _match(tokens, members, anchor, cursor, reachable, window, final: int):
+    """Next slot after `cursor` whose surface is `members[final]` with exactly `anchor` before.
 
     The anchor is matched as literal words, which is what makes verification need no table, no
     lexicon and no model -- and leaves no second definition of "anchor" that could disagree
     with the one embedding used.
+
+    The published member index is part of the match, not just a label. A member word can occur
+    earlier in the same anchor neighbourhood as a non-slot (``talked about it for about an
+    hour`` has two ``about``s with identical anchors after reachable words are skipped), and
+    binding blindly to the first one scored a published word as present when the copy did not
+    contain it.
 
     Members are matched as *token sequences*, because the table is full of multi-word
     alternatives ("in spite of", "a number of"). Matching only the head word silently dropped
@@ -127,6 +167,8 @@ def _match(tokens, members, anchor, cursor, reachable, window):
         if anchor_before(tokens, i, window, reachable) != anchor:
             continue
         for index, _member, parts in spans:
+            if index != final:
+                continue
             if not parts or i + len(parts) > len(tokens):
                 continue
             if tuple(tok.norm for tok in tokens[i : i + len(parts)]) == parts:

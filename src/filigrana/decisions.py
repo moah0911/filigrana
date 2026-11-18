@@ -1,6 +1,6 @@
 """The output type is the safety mechanism.
 
-`inkmark detect` produces evidence about a *person*, and the realistic harm is a false
+`filigrana detect` produces evidence about a *person*, and the realistic harm is a false
 accusation of plagiarism or a fabricated attribution. So the constraints live here rather
 than in a disclaimer:
 

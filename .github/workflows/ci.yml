@@ -6,11 +6,17 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        os: [ubuntu-latest, macos-latest]
         python-version: ["3.11", "3.12", "3.13"]
+        exclude:
+          - os: macos-latest
+            python-version: "3.11"
+          - os: macos-latest
+            python-version: "3.13"
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
@@ -25,7 +31,7 @@ jobs:
       - name: Tests
         run: >
           uv run pytest
-          --cov=inkmark --cov-report=term-missing --cov-fail-under=85
+          --cov=filigrana --cov-report=term-missing --cov-fail-under=85
 
   # Optional-dependency tiers get a real job rather than a hope: the Ed25519 manifest and
   # the WordNet provider both carry skip-guards, so plain dev-dep CI never exercises them.
@@ -58,3 +64,28 @@ jobs:
         run: uv run python tools/measure_free_choices.py --corpus corpus --lengths 1075 --keys 6
       - name: Attack sweep
         run: uv run python tools/attack_eval.py --corpus corpus --articles 20 --words 2500
+
+  release:
+    # PyPI is published by hand from a release workstation; this job only attaches the same
+    # sdist and wheel to the GitHub release once the tag is pushed and the tests are green.
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [test, optional-extras]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.13"
+      - name: Install release tooling
+        run: uv sync --locked --group release
+      - name: Build sdist and wheel
+        run: uv run python -m build
+      - name: Check distribution metadata
+        run: uv run twine check dist/*
+      - name: Attach artifacts to the GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true

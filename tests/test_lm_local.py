@@ -1,6 +1,6 @@
 """`LocalModelScorer` — real-model tests, self-skipping where no model is cached.
 
-Everything here needs `inkmark[lm]` *and* a model already in the local Hugging Face cache,
+Everything here needs `filigrana[lm]` *and* a model already in the local Hugging Face cache,
 because a unit suite that downloads 500 MB is a test in name only. On a workstation with
 gpt2 cached they pin the windowing arithmetic against a direct single pass; in CI they skip
 and the pure `plan_windows` suite carries the invariants instead.
@@ -42,8 +42,8 @@ def test_short_text_matches_a_plain_single_pass():
     answer for the lengths that never needed it."""
     import torch
 
-    from inkmark.canon import mask_markup
-    from inkmark.lm import LocalModelScorer
+    from filigrana.canon import mask_markup
+    from filigrana.lm import LocalModelScorer
 
     scorer = LocalModelScorer(**SCORER_ARGS)
     text = "the engineers walked slowly through the crowded square"
@@ -80,8 +80,8 @@ def test_a_text_longer_than_the_position_table_scores_every_row_without_error():
     """The 1024-cap failure mode: a long article used to raise IndexError inside the model's
     position embeddings. It must instead return a pass shaped exactly like one full pass,
     with a late word still scoring through some window."""
-    from inkmark.canon import mask_markup, tokenize
-    from inkmark.lm import LocalModelScorer
+    from filigrana.canon import mask_markup, tokenize
+    from filigrana.lm import LocalModelScorer
 
     scorer = LocalModelScorer(**SCORER_ARGS)
     text = " ".join(
@@ -101,7 +101,7 @@ def test_a_text_longer_than_the_position_table_scores_every_row_without_error():
 def test_logprob_of_the_first_word_is_impossible_everywhere():
     """The first word has no predicting row (the BOS piece owns row 0), so every member is
     -inf there. The gate must read that as 'no information', never as 'perfect evidence'."""
-    from inkmark.lm import LocalModelScorer
+    from filigrana.lm import LocalModelScorer
 
     scorer = LocalModelScorer(**SCORER_ARGS)
     pas = scorer.score("she walked slowly toward the grey station and the crowd parted")
@@ -109,7 +109,7 @@ def test_logprob_of_the_first_word_is_impossible_everywhere():
 
 
 def test_mean_logprob_is_zero_for_a_fragment_and_negative_for_prose():
-    from inkmark.lm import LocalModelScorer
+    from filigrana.lm import LocalModelScorer
 
     scorer = LocalModelScorer(**SCORER_ARGS)
     assert scorer.score("a").mean_logprob() == 0.0  # under two BPE pieces: nothing to condition on
@@ -121,9 +121,9 @@ def test_mean_logprob_is_zero_for_a_fragment_and_negative_for_prose():
 def test_propose_filters_a_gate_required_provider_through_a_real_pass():
     """WordNet proposals are sense-blind; `lm.propose` is the seam where a real model's
     band test turns them into a report. Whatever it keeps or drops, it must report."""
-    from inkmark.gate import FreeChoiceGate
-    from inkmark.lexical import WordNetProvider
-    from inkmark.lm import LocalModelScorer, propose
+    from filigrana.gate import FreeChoiceGate
+    from filigrana.lexical import WordNetProvider
+    from filigrana.lm import LocalModelScorer, propose
 
     scorer = LocalModelScorer(**SCORER_ARGS)
     text = "she carried the weight of the whole argument"

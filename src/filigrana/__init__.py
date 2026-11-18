@@ -1,6 +1,6 @@
-"""inkmark -- a writer-held statistical watermark for prose you wrote by hand.
+"""filigrana -- a writer-held statistical watermark for prose you wrote by hand.
 
-    from inkmark import WriterKey, embed, scan
+    from filigrana import WriterKey, embed, scan
 
 Two tiers, because they answer two different questions:
 

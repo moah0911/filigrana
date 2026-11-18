@@ -12,7 +12,7 @@ uv run python tools/detector_interference.py --corpus corpus --articles 60 --out
 
 Every number below is from this repository's own runs unless attributed. Machine-readable
 copies live in `bench/`: `density.json`, `attacks.json`, `lm_gate.json`, `interference.json`.
-The gated run needs `inkmark[lm]` and a local model; the rest need nothing but the corpus.
+The gated run needs `filigrana[lm]` and a local model; the rest need nothing but the corpus.
 
 ## The two numbers that decide everything
 
@@ -21,8 +21,8 @@ far from chance each one lands. Both are empirical, and `N` is the binding one:
 
 | table | ρ slots per 1,000 words | words for p<1e-6 at full strength |
 |---|---|---|
-| tier `a`+`b` (safe) | **8.3** | **2,733** |
-| tier `all` (+ locale & contractions) | **21.7** | **1,039** |
+| tier `a`+`b` (safe) | **8.27** | **2,733** |
+| tier `all` (+ locale & contractions) | **21.75** | **1,039** |
 
 Measured over 2,805 chunks × 10 foreign keys, `N` is key-independent so the density holds for
 anyone's key.
@@ -43,17 +43,18 @@ Null distribution of `z` under foreign keys on unmarked prose:
 
 | chunk | tier | mean z | sd | max z | measured FPR@1% | FPR@1e-6 |
 |---|---|---|---|---|---|---|
-| 215 w | `ab` | −0.015 | 0.91 | 2.65 | 0.04% | 0 |
-| 215 w | `all` | −0.016 | 0.99 | 3.00 | 0.40% | 0 |
-| 1,075 w | `ab` | −0.018 | 1.00 | 3.05 | 0.72% | 0 |
-| 1,075 w | `all` | +0.004 | 0.99 | 3.40 | 0.86% | 0 |
+| 215 w | `ab` | 0.001 | 0.91 | 2.67 | 0.05% | 0 |
+| 215 w | `all` | 0.001 | 0.99 | 3.36 | 0.48% | 0 |
+| 1,075 w | `ab` | 0.006 | 0.98 | 3.16 | 0.84% | 0 |
+| 1,075 w | `all` | 0.003 | 0.99 | 3.16 | 0.94% | 0 |
 
 Mean ~0 and sd ~1 means the model behaves; ~28,000 scored text/key pairs produced no single
 false reach of `p<1e-6`. Slight conservatism at 1% is welcome, not a bug.
 
 Short chunks are *under*-powered rather than trigger-happy: at 215 words `z` physically
-cannot reach the threshold, because there are ~1.8 slots. Six coin flips are not evidence, and
-this is why `detect` refuses to look confident below 8 slots instead of printing a small p.
+cannot reach the threshold, because there are ~1.9 slots. A couple of coin flips are not
+evidence, and this is why `detect` refuses to look confident below 8 slots instead of printing
+a small p.
 
 ## What survives, at 2,500 words
 
@@ -122,7 +123,7 @@ most useful sentence in this document.
 
 Structurally plausible — a key-correlated choice pattern is what an LLM watermark also is —
 and nobody has published the measurement. 60 matched articles, paired comparison, proxy
-metrics from `inkmark/slop.py` (**not** a commercial detector; the real answer needs
+metrics from `filigrana/slop.py` (**not** a commercial detector; the real answer needs
 Originality/Pangram/GPTZero accounts, which is why `--export-pairs` exists):
 
 | metric | marked − original | with `--anti-slop` | rose in |

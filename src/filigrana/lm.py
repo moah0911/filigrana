@@ -96,8 +96,8 @@ class LocalModelScorer:
             from transformers import AutoModelForCausalLM, AutoTokenizer
         except ImportError as exc:  # pragma: no cover - depends on the extra
             raise ImportError(
-                "the model-gated path needs 'inkmark[lm]' (torch + transformers). The curated "
-                "path in inkmark.embed / inkmark.detect needs nothing at all."
+                "the model-gated path needs 'filigrana[lm]' (torch + transformers). The curated "
+                "path in filigrana.embed / filigrana.detect needs nothing at all."
             ) from exc
         self.torch = torch
         self.model_id = model_id

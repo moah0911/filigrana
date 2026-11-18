@@ -26,10 +26,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from inkmark.detect import scan
-from inkmark.keyring import WriterKey
-from inkmark.ledger import walk, word_count
-from inkmark.providers import default_table
+from filigrana.detect import scan
+from filigrana.keyring import WriterKey
+from filigrana.ledger import walk, word_count
+from filigrana.providers import default_table
 
 Z_1e6 = 4.754  # one-sided p < 1e-6
 Z_1p = 2.326  # one-sided p < 1%

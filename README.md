@@ -1,8 +1,8 @@
-# inkmark
+# filigrana
 
 A writer-held statistical watermark for prose you wrote **by hand**.
 
-`inkmark` lets you bias the equally-good choices in your own writing — `toward` vs
+`filigrana` lets you bias the equally-good choices in your own writing — `toward` vs
 `towards`, `however` vs `nevertheless`, `a number of` vs `several` — according to a key only
 you hold. Six months later, when a content farm has republished your essay as plain text,
 you can run your key over their copy and get a p-value for whether your word choices are in
@@ -12,33 +12,42 @@ Nothing is added to the text. There are no hidden characters, no metadata, no in
 codepoints. A reader sees an essay; someone with your key sees statistics.
 
 ```console
-$ git clone https://github.com/YOU/inkmark && cd inkmark && uv sync   # not on PyPI yet
-$ alias inkmark='uv run inkmark'
-$ inkmark key new                            # scrypt-encrypted keyring, 0600
-$ inkmark audit essay.md                     # can this article even carry a mark?
-$ inkmark embed essay.md                     # preview the diff, writes nothing
-$ inkmark embed essay.md --anti-slop --out essay.marked.md --sidecar essay.sidecar.json
-$ inkmark publish essay.marked.md --handle ada --published 2026-11-06 --domain example.com
-$ inkmark detect scraped-copy.html           # p-value plus caveats, never a verdict
+$ pip install filigrana        # Python 3.11+, macOS or Linux
+$ filigrana key new                            # scrypt-encrypted keyring, 0600
+$ filigrana audit essay.md                     # can this article even carry a mark?
+$ filigrana embed essay.md                     # preview the diff, writes nothing
+$ filigrana embed essay.md --anti-slop --out essay.marked.md --sidecar essay.sidecar.json
+$ filigrana publish essay.marked.md --handle ada --published 2026-11-06 --domain example.com
+$ filigrana detect scraped-copy.html           # p-value plus caveats, never a verdict
+```
+
+From a checkout instead:
+
+```console
+$ git clone https://github.com/moah0911/filigrana && cd filigrana && uv sync
+$ uv run filigrana --version
 ```
 
 A real run, on the 144-word article in [`examples/essay.md`](examples/essay.md). Both output
 files are checked in, so you can diff `essay.md` against `essay.marked.md` yourself — the
-visible changes are `a lot of`→`lots of`, `afterwards`→`afterward`, `grey`→`gray`,
-`Perhaps`→`Maybe`.
+visible changes are `a lot of`→`lots of`, `Perhaps`→`Maybe`, `Among`→`Amongst`,
+`judgement`→`judgment`, `onward`→`onwards`, `at this point`→`at this stage`,
+`recognise`→`recognize`, `although`→`though`.
 
 ```console
-$ inkmark embed examples/essay.md --tier all --anti-slop
+$ filigrana embed examples/essay.md --tier all --anti-slop
 144 words, 23 eligible choices
-10 edits (6.94% of words), 2 declined by you
+8 edits (5.56% of words), 2 declined by you
 21/23 slots now agree with the key
 
-$ inkmark detect examples/essay.marked.md --tier all
+$ filigrana detect examples/essay.marked.md --tier all
+143 words, 23 key-correlated choices  (a:6, b:12, c:5)
 agreement  21/23 slots on the key's side (chance would give 11.3)
 statistics z = 4.04, p = 2.66e-05
 strength   15.2 bits of evidence against chance
 
-$ inkmark audit examples/essay.md --tier all      # what this piece can support, up front
+$ filigrana audit examples/essay.md --tier all      # what this piece can support, up front
+144 words, 23 choices (159.7 per 1000 words) {'b': 12, 'a': 6, 'c': 5}
 best possible z at full strength: 4.88  (p = 5.38e-07)
   verbatim copy              z ->   4.88   p -> 5.38e-07
   25% of slots edited away   z ->   4.22   p -> 1.2e-05
@@ -46,10 +55,10 @@ best possible z at full strength: 4.88  (p = 5.38e-07)
   a quarter of slots left    z ->   2.44   p -> 0.00737
 ```
 
-Against a **foreign** key the same marked text scores 12/23, z = 0.28, p = 0.39 — chance. One
+Against a **foreign** key the same marked text scores 13/23, z = 0.70, p = 0.24 — chance. One
 draw is not evidence of calibration; [docs/CAPACITY.md](docs/CAPACITY.md) has the null over
-~28,000 foreign key/text pairs, where `z` sits at mean −0.018, sd 1.00, max 3.05, with zero
-false reaches of `p<1e-6` in 648k words of unmarked prose.
+~28,000 foreign key/text pairs, where `z` sits at mean 0.006, sd 0.98, max 3.16 at article
+length, with zero false reaches of `p<1e-6` in 648k words of unmarked prose.
 
 ---
 
@@ -67,9 +76,9 @@ measured the failure modes honestly — numbers we reproduce and extend in
 **The mechanism is older than LLMs.** Keyed synonym substitution is Topkara, Topkara &
 Atallah, *ACM MM&Sec 2006*; syntactic equivalence classes go back to Atallah's *NL Watermark*
 (IH 2001); context-aware lexical substitution is Yang et al., AAAI 2022. Model-free detection
-by Bernoulli test is Yang et al., arXiv:2305.08883. `inkmark` claims no new algorithm.
+by Bernoulli test is Yang et al., arXiv:2305.08883. `filigrana` claims no new algorithm.
 
-**What `inkmark` is actually for** is the engineering those works do not do: an installable
+**What `filigrana` is actually for** is the engineering those works do not do: an installable
 library with a tested determinism contract, a key and identity model with rotation and
 revocation (because a personal watermark identifies a *person*, which Anthropic's explicitly
 does not), multiplicity-corrected p-values, an auditable equivalence table where every class
@@ -101,12 +110,12 @@ Not for:
 
 Most designs conflate these. For the scraper problem you already know who you are, so you
 never need to decode anything — you just test your key. That is why tier 1 is the default and
-why `inkmark` works at essay length where a full handle-plus-date payload does not.
+why `filigrana` works at essay length where a full handle-plus-date payload does not.
 
 ## How the watermark gets its "free choice"
 
 Production LLM watermarks bias a model's logits during sampling. A human writer has no
-logits. So `inkmark` manufactures the choice from a hand-audited table of **equivalence
+logits. So `filigrana` manufactures the choice from a hand-audited table of **equivalence
 classes**:
 
 ```python
@@ -119,7 +128,7 @@ bar is much higher than "these are synonyms", and it is the whole project: `help
 excluded because `foreign aid` cannot become `foreign help`; `although`/`though` is kept but
 guarded, because `I liked it though` has no `although` version. Automated synonym tables get
 this wrong — the prior art measured **100% of marked passages becoming less fluent and 17.3%
-gaining a grammatical error**. `inkmark` therefore previews a diff and lets you veto any
+gaining a grammatical error**. `filigrana` therefore previews a diff and lets you veto any
 edit, rather than rewriting your draft.
 
 Each slot's demanded member is `HMAC-SHA256(secret, scheme ‖ key_id ‖ class ‖ anchor ‖
@@ -157,7 +166,7 @@ watermark is free has not looked at the output.
   buys roughly one false accusation per scan.
 - **Caveats are never empty**, and short text says so itself: below 8 slots the statistic is
   noise and the output tells you not to quote it.
-- **Keys stay local.** `inkmark detect` performs no network I/O. Any third-party "inkmark
+- **Keys stay local.** `filigrana detect` performs no network I/O. Any third-party "filigrana
   checker" is untrusted by design — it could both forge your mark and fingerprint your whole
   corpus.
 - **Verification is delegable but scoped.** `key.for_domain("example.com")` gives a publisher
@@ -171,18 +180,18 @@ Over 648,423 words of public-domain prose, 2,805 chunks and ~28,000 key/text pai
 
 | | tier `ab` (safe) | tier `all` (+ locale, contractions) |
 |---|---|---|
-| free choices per 1,000 words | **8.3** | **21.7** |
+| free choices per 1,000 words | **8.27** | **21.75** |
 | words to reach `p<1e-6` | 2,733 | 1,039 |
 | detected after 30% of sentences deleted | 1% | 64% |
 | detected after a house-style normaliser | 13% | 77% |
 | detected after full paraphrase or translation | ~0% | ~0% |
-| null `z` under a foreign key | mean −0.018, sd 1.00, max 3.05 | mean +0.004, sd 0.99, max 3.40 |
+| null `z` under a foreign key | mean 0.006, sd 0.98, max 3.16 | mean 0.003, sd 0.99, max 3.16 |
 | false positives at `p<1e-6` in 28,000 trials | 0 | 0 |
 
 Three consequences worth stating plainly:
 
 - **Prior art's ρ ≈ 60 is achievable and costs prose.** Their own numbers: 100% of passages
-  less fluent, 17.3% with a new grammatical error. Our 8.3 is the price of a table where every
+  less fluent, 17.3% with a new grammatical error. Our 8.27 is the price of a table where every
   class is provably substitutable both directions. Density is a measure of how much damage you
   accept, not a property of English.
 - **Tier 2 (decoding an identity out of unattributed text) needs ~41,000 words for 16 bits.**
@@ -207,7 +216,7 @@ sidecar.py          publish what was free, so verification needs no table, lexic
 codec.py            tier-2 wire format and per-bit voting
 keyring.py          scrypt-encrypted keyring, fingerprints, domain subkeys, rotation
 registry.py         self-hosted id -> handle file; we run no service
-manifest.py         detached signed provenance (HMAC by default, Ed25519 via inkmark[sign])
+manifest.py         detached signed provenance (HMAC by default, Ed25519 via filigrana[sign])
 gate.py             the free-choice gate: keep a proposal only on a probability plateau
 lm.py               model-gated embedding under torch, optional: proposals filtered, never invented
 lexical.py          WordNet proposals, sense-blind by construction, refused without a gate
@@ -221,12 +230,14 @@ bench/                  the JSON those runs produced (density, attacks, lm_gate,
 
 ## Status
 
-`0.1.0`, alpha, 92 tests, ruff + mypy + coverage-gated CI, full type annotations (`py.typed`).
-Shipped and measured: key generation with scrypt-encrypted storage and scoped verifier
+`0.1.0`, alpha, 206 tests, ruff + mypy + coverage-gated CI, full type annotations
+(`py.typed`). Supported platforms are macOS and Linux; the keyring refuses to run on Windows
+rather than writing a secret without POSIX `0600` semantics.
+Shipped and measured: key generation with scrypt-encrypted atomic storage and scoped verifier
 subkeys; tier-1 embedding with reviewed per-slot diffs; drift self-check; detection with
 variable-arity statistics, multiplicity correction and mandatory caveats; a
 serialization-invariance suite; the tier-2 payload codec; the registry format; detached
-manifests (HMAC always; Ed25519 through the `inkmark[sign]` extra); the anti-slop style
+manifests (HMAC always; Ed25519 through the `filigrana[sign]` extra); the anti-slop style
 guard; and the capacity report over 648k words.
 
 **The LM-assisted free-choice gate is in this tree and measured:** `gate.py` adds the
@@ -240,7 +251,7 @@ Not shipped, in the order that matters:
 
 1. **Inference beyond a first plateau pass**: higher density without paying in prose quality
    is bounded by how rare the plateau condition is in real prose (measured; see CAPACITY).
-2. **Ed25519 manifests as the default rather than the extra** (`inkmark[sign]` already
+2. **Ed25519 manifests as the default rather than the extra** (`filigrana[sign]` already
    installs the audited library; the default stays stdlib-HMAC until there is a reason).
 3. **A real detector-interference study** on matched pairs through Originality/Pangram/
    GPTZero. The proxy says the collision is mild; `--export-pairs` and

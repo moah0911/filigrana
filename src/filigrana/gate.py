@@ -1,7 +1,7 @@
 """The free-choice gate: a bounded test, applied to candidates somebody else proposed.
 
 Anthropic's explainer says the watermark only acts where either choice would be equally
-good. A writer has no logits, so `inkmark` recovers that condition after the fact: score the
+good. A writer has no logits, so `filigrana` recovers that condition after the fact: score the
 draft with a small causal model and keep a position only when the writer's word sits on a
 **plateau** -- within `epsilon` nats of the best alternative, with at least one other
 admissible candidate in the same band.

@@ -1,7 +1,7 @@
 """Out-of-band provenance: the part that is strong, and the part that survives copying.
 
 The in-band mark is fragile and survives copy-paste. The manifest is strong and does not:
-strip the container and it is gone. They are complements, and `inkmark` ships both because a
+strip the container and it is gone. They are complements, and `filigrana` ships both because a
 writer needs both -- the manifest for the conversation with a lawyer or an editor, the mark
 for the scraper who pasted your essay into a template.
 
@@ -10,14 +10,14 @@ Signing has two levels, and which one you get depends on whether `cryptography` 
 * **default, stdlib** -- an HMAC attestation under a nominated-verifier subkey. Anyone you
   hand that subkey to can check the manifest; nobody can forge it without the key; but you
   cannot publish verification to the world, because the checking key is the signing key.
-* **`inkmark[sign]`** -- Ed25519 over the same bytes, so the public key goes on your site and
+* **`filigrana[sign]`** -- Ed25519 over the same bytes, so the public key goes on your site and
   anyone can verify. Not implemented with hand-rolled curve maths: an identity-bearing
   signature is exactly the place where writing your own crypto is indefensible, so this path
   refuses to pretend and requires the audited library.
 
 Neither is C2PA. C2PA is the right long-term container -- it is what Anthropic attaches to
 generated images -- and it needs a real issuer, a certificate chain, and timestamps from a
-authority you trust. This format is deliberately `inkmark-manifest/1` and says so, so that
+authority you trust. This format is deliberately `filigrana-manifest/1` and says so, so that
 nobody mistakes it for the industry standard it hopes to become.
 """
 
@@ -28,7 +28,7 @@ import json
 from dataclasses import dataclass
 from datetime import UTC, datetime
 
-FORMAT = "inkmark-manifest/1"
+FORMAT = "filigrana-manifest/1"
 
 try:  # optional, and honestly so: no hand-written curve arithmetic in this repository
     from cryptography.exceptions import InvalidSignature
@@ -75,10 +75,22 @@ class Manifest:
 
     @classmethod
     def from_json(cls, blob: str) -> "Manifest":
-        data = json.loads(blob)
+        try:
+            data = json.loads(blob)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"manifest is not valid JSON: {exc.msg}") from None
+        if not isinstance(data, dict):
+            raise ValueError("a filigrana manifest must be a JSON object")
         if data.get("format") != FORMAT:
-            raise ValueError("not an inkmark manifest")
-        meta = {k: v for k, v in data.items() if k not in {"format", "sha256_canonical", "scheme", "attestation", "ed25519"}}
+            raise ValueError("not a filigrana manifest")
+        for field in ("sha256_canonical", "attestation", "scheme"):
+            if not isinstance(data.get(field), str):
+                raise ValueError(f"manifest field {field!r} is missing or not a string")
+        meta = {
+            k: v
+            for k, v in data.items()
+            if k not in {"format", "sha256_canonical", "scheme", "attestation", "ed25519"}
+        }
         return cls(
             digest=data["sha256_canonical"],
             meta=meta,
@@ -144,7 +156,7 @@ def verify(canonical_text: str, manifest: Manifest, key: bytes) -> dict:
 
 
 def verify_ed25519(canonical_text: str, manifest: Manifest, public_key_bytes: bytes) -> bool:
-    """Independent public-key check. Requires `inkmark[sign]`; there is no fallback, because a
+    """Independent public-key check. Requires `filigrana[sign]`; there is no fallback, because a
     signature we could verify with stdlib alone would be a signature we could also forge."""
     if not manifest.signature or not _HAS_ED25519:
         return False
@@ -167,7 +179,7 @@ def ed25519_available() -> bool:
 def generate_signing_pair() -> tuple[bytes, bytes]:
     """Ed25519 keys, if the optional dependency is present. Never a private key from RNG soup."""
     if not _HAS_ED25519:
-        raise RuntimeError("pip install 'inkmark[sign]' -- inkmark will not implement Ed25519 itself")
+        raise RuntimeError("pip install 'filigrana[sign]' -- filigrana will not implement Ed25519 itself")
     private = Ed25519PrivateKey.generate()
     from cryptography.hazmat.primitives.serialization import (
         Encoding,

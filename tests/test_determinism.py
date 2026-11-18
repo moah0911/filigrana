@@ -9,10 +9,10 @@ import re
 
 import pytest
 
-from inkmark.canon import canonical_form
-from inkmark.keyring import WriterKey
-from inkmark.ledger import walk
-from inkmark.providers import default_table
+from filigrana.canon import canonical_form
+from filigrana.keyring import WriterKey
+from filigrana.ledger import walk
+from filigrana.providers import default_table
 
 ARTICLE = """
 
@@ -89,7 +89,7 @@ def test_demands_key_off_words_the_watermark_cannot_rewrite():
     """Anchor words are exactly those no class reaches, so embedding never disturbs them."""
     entries = walk(ANCHORED, KEY, TABLE)
     assert entries
-    _indices, norms = TABLE.anchors(__import__("inkmark.canon", fromlist=["tokenize"]).tokenize(ANCHORED))
+    _indices, norms = TABLE.anchors(__import__("filigrana.canon", fromlist=["tokenize"]).tokenize(ANCHORED))
     assert all(norm not in TABLE.reachable for norm in norms)
     for entry in entries:
         assert entry.class_id.split(".")[0] in {"a", "b", "c"}
@@ -136,7 +136,7 @@ def test_link_labels_are_prose_but_urls_are_not():
 
 
 def test_relabel_carries_the_originals_case_pattern():
-    from inkmark.canon import relabel
+    from filigrana.canon import relabel
 
     assert relabel("Judgement", "judgment") == "Judgment"
     assert relabel("JUDGEMENT", "judgment") == "JUDGMENT"

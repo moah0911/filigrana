@@ -60,6 +60,9 @@ def decode_identity(payload: int, bits: int = WIRE_BITS) -> tuple[int, _dt.date,
 
 def bit_source(payload: int, n_bits: int):
     """Slot i carries payload bit i % n_bits, most significant first."""
+    if n_bits <= 0:
+        raise ValueError("n_bits must be positive")
+
     def source(index: int) -> int:
         return (payload >> (n_bits - 1 - (index % n_bits))) & 1
 
@@ -97,7 +100,7 @@ class PayloadRead:
 
     @property
     def payload(self) -> int | None:
-        if self.unresolved:
+        if self.unresolved or not self.votes:
             return None
         return int("".join(str(v.resolved) for v in self.votes), 2)
 
@@ -115,6 +118,8 @@ def read_payload(
     window: int = DEFAULT_WINDOW,
 ) -> PayloadRead:
     """Vote each slot toward bit 0 and bit 1, then take per-bit majorities."""
+    if n_bits <= 0:
+        raise ValueError("n_bits must be positive")
     table = table or default_table()
     zero = walk(text, key, table, window=window, mode="detect", bit_source=lambda _i: 0)
     one = walk(text, key, table, window=window, mode="detect", bit_source=lambda _i: 1)

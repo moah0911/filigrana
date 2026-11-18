@@ -1,38 +1,68 @@
 [project]
-name = "inkmark"
-version = "0.1.0"
+name = "filigrana"
+dynamic = ["version"]
 description = "Writer-held statistical watermark: evidence that your prose is yours, never a verdict"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
+license-files = ["LICENSE"]
 authors = [{ name = "rad" }]
-keywords = ["watermarking", "provenance", "authorship", "text"]
+keywords = ["watermarking", "statistical-watermarking", "provenance", "authorship", "text"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Environment :: Console",
   "Intended Audience :: End Users/Desktop",
   "Natural Language :: English",
+  "Operating System :: MacOS",
+  "Operating System :: POSIX :: Linux",
   "Topic :: Text Processing :: Markup",
   "Typing :: Typed",
 ]
 
 [project.optional-dependencies]
-serve = ["fastapi>=0.110", "uvicorn>=0.29"]
 lm = ["transformers>=4.46", "torch>=2.2"]
-# Ed25519 manifests: pip install 'inkmark[sign]'. Refuses to rotate its own curve maths.
+# Ed25519 manifests: pip install 'filigrana[sign]'. Refuses to rotate its own curve maths.
 sign = ["cryptography>=42"]
-# WordNet candidate proposals: needs the corpus downloaded as well (see inkmark.lexical).
+# WordNet candidate proposals: needs the corpus downloaded as well (see filigrana.lexical).
 lexical = ["nltk>=3.8"]
 
 [project.scripts]
-inkmark = "inkmark.cli:main"
+filigrana = "filigrana.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/moah0911/filigrana"
+Repository = "https://github.com/moah0911/filigrana"
+Issues = "https://github.com/moah0911/filigrana/issues"
+Changelog = "https://github.com/moah0911/filigrana/blob/master/CHANGELOG.md"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.version]
+path = "src/filigrana/__init__.py"
+
 [tool.hatch.build.targets.wheel]
-packages = ["src/inkmark"]
+packages = ["src/filigrana"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/src/filigrana",
+  "/tests",
+  "/docs",
+  "/examples",
+  "/bench",
+  "/tools",
+  "/README.md",
+  "/LICENSE",
+  "/CHANGELOG.md",
+  "/SECURITY.md",
+  "/pyproject.toml",
+]
+exclude = [
+  "/**/__pycache__",
+  "/**/*.pyc",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -55,7 +85,7 @@ ignore = [
 
 [tool.mypy]
 python_version = "3.11"
-files = ["src/inkmark"]
+files = ["src/filigrana"]
 # The optional-dependency boundary is typed honestly loose: torch/transformers/nltk carry
 # no usable stubs for what we do, so those call sites say Any deliberately.
 ignore_missing_imports = true
@@ -69,4 +99,8 @@ dev = [
   "pytest-cov>=5.0",
   "ruff>=0.8",
   "mypy>=1.13",
+]
+release = [
+  "build>=1.2",
+  "twine>=5.1",
 ]

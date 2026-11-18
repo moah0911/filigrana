@@ -1,7 +1,7 @@
 """Stage 6: does marking your own prose make it look machine-generated to someone else?
 
 Paired comparison on the same articles -- original, marked, marked with the style guard --
-scored on `inkmark.slop` metrics. Because every article appears in all three conditions the
+scored on `filigrana.slop` metrics. Because every article appears in all three conditions the
 comparison is paired, so we report the sign of the difference per article, not just means.
 
 The honest framing: this measures a *proxy*. To settle the question you need matched marked
@@ -22,10 +22,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from inkmark.embed import embed
-from inkmark.keyring import WriterKey
-from inkmark.providers import default_table
-from inkmark.slop import is_slop, profile
+from filigrana.embed import embed
+from filigrana.keyring import WriterKey
+from filigrana.providers import default_table
+from filigrana.slop import is_slop, profile
 
 KEYS = (
     ("burstiness", "sentence-length sd (lower reads more machine)"),
@@ -94,7 +94,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"\nslots spent by the style guard: {spent}/{total_slots} "
           f"({100 * spent / max(total_slots, 1):.1f}% of the statistical strength)")
     print("The guard pays votes to keep prose human; the columns above are what it buys.")
-    print("Not a commercial detector. See src/inkmark/slop.py before quoting any number here.")
+    print("Not a commercial detector. See src/filigrana/slop.py before quoting any number here.")
 
     if args.out:
         Path(args.out).write_text(

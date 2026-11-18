@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import pytest
 
-from inkmark.providers import CuratedTable, EquivalenceClass, default_table
+from filigrana.providers import CuratedTable, EquivalenceClass, default_table, normalise_tier
 
 
 class TestClassValidation:
@@ -35,9 +35,22 @@ class TestClassValidation:
 
 
 class TestTheShippedTable:
+    def test_tiers_are_canonicalised_before_they_select_classes(self):
+        assert normalise_tier("BA") == "ab"
+        assert normalise_tier("aab") == "ab"
+        assert normalise_tier("all") == "all"
+        assert default_table("ba").class_count == default_table("ab").class_count
+
+    @pytest.mark.parametrize("tier", ["", "xyz", "d", "a-b"])
+    def test_a_typo_cannot_silently_select_no_classes(self, tier):
+        with pytest.raises(ValueError, match="tier must be"):
+            normalise_tier(tier)
+        with pytest.raises(ValueError, match="tier must be"):
+            default_table(tier)
+
     def test_known_shared_surfaces_are_guard_disambiguated(self):
         # audit() lists surfaces claimed by more than one class; the shipped table has
-        # exactly the approx pair, and `inkmark table` warns so both guards stay audited.
+        # exactly the approx pair, and `filigrana table` warns so both guards stay audited.
         problems = default_table("all").audit()
         assert problems, "if the approx pair stops sharing surfaces, update this pin"
         assert all(
